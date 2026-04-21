@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Calendar, User, Hash, Image as ImageIcon, Upload, X, FileWarning } from 'lucide-react';
+import { Calendar, User, Hash, Image as ImageIcon, Upload, X, FileWarning, Banknote, Printer, Layers } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Toast } from '@/Data/Data';
 import { Imageupload } from '@/lib/utils';
 import useAxiosSecure from '@/components/Hooks/useAxiosSecure';
+import axios from 'axios';
 
 export default function NewIssuePage() {
     const [preview, setPreview] = useState(null);
-    const axiosSecure = useAxiosSecure()
-    // 1. Added setValue to useForm to manually update the form state
+   
     const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm();
 
     const handleImageChange = (e) => {
@@ -27,13 +27,11 @@ export default function NewIssuePage() {
                 });
                 e.target.value = null;
                 setPreview(null);
-                setValue("image", null); // Clear from form data
+                setValue("image", null);
                 return;
             }
 
-            // 2. This connects the file to your "data" object in onSubmit
             setValue("image", file);
-
             const reader = new FileReader();
             reader.onloadend = () => setPreview(reader.result);
             reader.readAsDataURL(file);
@@ -41,42 +39,36 @@ export default function NewIssuePage() {
     };
 
     const onSubmit = async (data) => {
-        // "data.image" will now contain the File object
-        console.log("Submitting BNPA Issue:", data);
-        const { title, dateOfIssue, designer, image, postmarkNumber } = data
-
-
-        const uploadedimage = await Imageupload(image)
-
-        const issuseData = {
-            title,
-            dateOfIssue,
-            designer,
-            image: uploadedimage,
-            postmarkNumber
-        }
-
-        console.log(issuseData)
-
+        // data will now include: title, dateOfIssue, designer, postmarkNumber, numStamps, faceValue, printers
+        const { title, dateOfIssue, designer, image, postmarkNumber, numStamps, faceValue, printers } = data
+          
         try {
+            const uploadedimage = await Imageupload(image)
 
-            const res = await axiosSecure.post("/new-issue", issuseData)
+            const issueData = {
+                title,
+                dateOfIssue,
+                designer,
+                image: uploadedimage,
+                postmarkNumber,
+                numStamps,     // New field
+                faceValue,     // New field
+                printers       // New field
+            }
+            console.log("form issue",issueData)
 
-            console.log(res.data)
+            const res = await axios.post("https://bnpa-mysql.vercel.app/new-issue", issueData)
+
             if (res.data.insertedId) {
-
                 Toast.fire({
                     icon: 'success',
                     title: 'Issue Published',
                     text: 'The new philatelic issue has been added to BNPA records.',
                     timer: 2000
                 });
-
                 reset();
                 setPreview(null);
             }
-
-
         } catch (error) {
             Toast.fire({ icon: 'error', title: 'Error saving issue' });
         }
@@ -97,6 +89,8 @@ export default function NewIssuePage() {
                         <div className="flex-1 space-y-6">
                             <Card className="border-slate-200 shadow-sm">
                                 <CardContent className="pt-6 space-y-5">
+
+                                    {/* Row 1: Title */}
                                     <div className="space-y-1">
                                         <label className="text-sm font-bold text-slate-700">Title of Issue</label>
                                         <div className="relative">
@@ -109,19 +103,21 @@ export default function NewIssuePage() {
                                         </div>
                                     </div>
 
-                                    <div className="space-y-1">
-                                        <label className="text-sm font-bold text-slate-700">Date of Issue</label>
-                                        <div className="relative">
-                                            <Calendar className="absolute left-3 top-3 text-slate-400" size={18} />
-                                            <Input
-                                                type="date"
-                                                {...register("dateOfIssue", { required: "Date is required" })}
-                                                className="pl-10 h-11 focus-visible:ring-[#26bba4]"
-                                            />
-                                        </div>
-                                    </div>
-
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        {/* Row 2: Date */}
+                                        <div className="space-y-1">
+                                            <label className="text-sm font-bold text-slate-700">Date of Issue</label>
+                                            <div className="relative">
+                                                <Calendar className="absolute left-3 top-3 text-slate-400" size={18} />
+                                                <Input
+                                                    type="date"
+                                                    {...register("dateOfIssue", { required: "Date is required" })}
+                                                    className="pl-10 h-11 focus-visible:ring-[#26bba4]"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Row 2: Designer */}
                                         <div className="space-y-1">
                                             <label className="text-sm font-bold text-slate-700">Designer</label>
                                             <div className="relative">
@@ -133,6 +129,54 @@ export default function NewIssuePage() {
                                                 />
                                             </div>
                                         </div>
+                                    </div>
+
+                                    {/* New Section: Technical Details */}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        {/* Number of Stamps */}
+                                        <div className="space-y-1">
+                                            <label className="text-sm font-bold text-slate-700">Number of Stamps</label>
+                                            <div className="relative">
+                                                <Layers className="absolute left-3 top-3 text-slate-400" size={18} />
+                                                <Input
+                                                    type="number"
+                                                    {...register("numStamps", { required: true })}
+                                                    placeholder="Total stamps in set"
+                                                    className="pl-10 h-11 focus-visible:ring-[#26bba4]"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Face Value */}
+                                        <div className="space-y-1">
+                                            <label className="text-sm font-bold text-slate-700">Face Value (BDT)</label>
+                                            <div className="relative">
+                                                <Banknote className="absolute left-3 top-3 text-slate-400" size={18} />
+                                                <Input
+                                                    type="text"
+                                                    {...register("faceValue", { required: true })}
+                                                    placeholder="e.g., 10.00 or 50.00"
+                                                    className="pl-10 h-11 focus-visible:ring-[#26bba4]"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        {/* Printers */}
+                                        <div className="space-y-1">
+                                            <label className="text-sm font-bold text-slate-700">Printers</label>
+                                            <div className="relative">
+                                                <Printer className="absolute left-3 top-3 text-slate-400" size={18} />
+                                                <Input
+                                                    {...register("printers", { required: true })}
+                                                    placeholder="Security Printing Press"
+                                                    className="pl-10 h-11 focus-visible:ring-[#26bba4]"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Postmark Number */}
                                         <div className="space-y-1">
                                             <label className="text-sm font-bold text-slate-700">Number of Postmark</label>
                                             <div className="relative">
@@ -167,12 +211,12 @@ export default function NewIssuePage() {
                             </div>
                         </div>
 
-                        {/* Right Side: Photo Upload */}
+                        {/* Right Side: Photo Upload Preview */}
                         <div className="xl:w-[540px] shrink-0">
                             <Card className="border-slate-200 shadow-sm">
                                 <CardHeader className="pb-3 border-b bg-slate-50/50">
                                     <CardTitle className="text-xs font-black uppercase tracking-widest text-slate-500">
-                                        Issue Image (500px Preview)
+                                        Issue Image (Preview)
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="pt-6">
@@ -182,16 +226,11 @@ export default function NewIssuePage() {
                                                 <img
                                                     src={preview}
                                                     alt="Stamp Preview"
-                                                    style={{ width: '500px', height: 'auto' }}
-                                                    className="block transition-transform duration-300 group-hover:scale-[1.02]"
+                                                    className="w-[500px] h-auto block transition-transform duration-300 group-hover:scale-[1.02]"
                                                 />
                                                 <button
                                                     type="button"
-
-                                                    onClick={() => {
-                                                        setPreview(null);
-                                                        setValue("image", null); // Clear from form data
-                                                    }}
+                                                    onClick={() => { setPreview(null); setValue("image", null); }}
                                                     className="absolute top-4 right-4 p-2 bg-red-600 text-white rounded-full hover:scale-110 transition-all shadow-lg"
                                                 >
                                                     <X size={20} />
@@ -200,13 +239,12 @@ export default function NewIssuePage() {
                                         ) : (
                                             <label className="flex flex-col items-center justify-center w-[500px] aspect-[4/3] rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-[#26bba4] transition-all cursor-pointer">
                                                 <div className="text-center p-10">
-                                                    <Upload className="w-12 h-12 text-slate-300 mx-auto mb-4 group-hover:text-[#26bba4]" />
-                                                    <p className="text-sm font-bold text-slate-600 uppercase tracking-tighter">Click to Upload</p>
-                                                    <p className="text-xs text-slate-400 mt-2">Max Size: 3000 KB (3MB)</p>
+                                                    <Upload className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                                                    <p className="text-sm font-bold text-slate-600 uppercase">Click to Upload</p>
+                                                    <p className="text-xs text-slate-400 mt-2">Max Size: 3MB</p>
                                                 </div>
                                                 <input
                                                     type="file"
-                                                    required
                                                     className="hidden"
                                                     accept="image/*"
                                                     onChange={handleImageChange}
@@ -218,7 +256,6 @@ export default function NewIssuePage() {
                                         <FileWarning className="text-amber-600 mt-0.5" size={18} />
                                         <p className="text-[12px] text-amber-800 leading-relaxed font-medium">
                                             High-resolution scans preferred for the BNPA archive.
-                                            Ensure the file size is under 3000 KB.
                                         </p>
                                     </div>
                                 </CardContent>

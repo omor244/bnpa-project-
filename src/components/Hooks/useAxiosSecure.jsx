@@ -5,7 +5,7 @@ import useAuth from './useAuth'
 
 
 const axiosInstance = axios.create({
-    baseURL: 'https://bnpa-backend.vercel.app',
+    baseURL: 'https://bnpa-mysql.vercel.app',
     withCredentials: true,
 })
 

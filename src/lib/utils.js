@@ -10,7 +10,7 @@ export function cn(...inputs) {
 export const saveorupdateuser = async (userdata) => {
 
 
-  const { data } = await axios.post('https://bnpa-backend.vercel.app/users', userdata)
+  const { data } = await axios.post('https://bnpa-mysql.vercel.app/users', userdata)
 
   return data
 }

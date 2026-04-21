@@ -5,24 +5,7 @@ import Swal from "sweetalert2";
 
 
  
- export const GetAllUserData = () => {
 
-    
-    const { data: users, isLoading, refetch } = useQuery({
-        queryKey: ['users'],
-
-        queryFn: async () => {
-
-            const { data } = await axios.get("https://bnpa-backend.vercel.app/users")
-
-            return {data,isLoading, refetch }
-        }
-    })
-     
-     if(isLoading) return <LoadingPage/>
-
-    return users 
-}
 
 
 export const handleStatusUpdate = async (userId, newStatus, refetch ) => {
@@ -43,9 +26,10 @@ export const handleStatusUpdate = async (userId, newStatus, refetch ) => {
             if (result.isConfirmed) {
                 try {
 
-                    const res = await axios.patch(`https://bnpa-backend.vercel.app/users/${userId}`, { newStatus })
-
-                    if (res.data.acknowledged) {
+                    const res = await axios.patch(`https://bnpa-mysql.vercel.app/users/${userId}`, { newStatus })
+                       
+                    console.log(res)
+                    if (res.data.affectedRows) {
 
                         console.log(res.data)
                          refetch()
@@ -94,9 +78,10 @@ export const handleDeleteUser = async (userId, refetch) => {
         if (result.isConfirmed) {
             try {
 
-                const res = await axios.delete(`https://bnpa-backend.vercel.app/users/${userId}`)
-
-                if (res.data.deletedCount) {
+                const res = await axios.delete(`https://bnpa-mysql.vercel.app/users/${userId}`)
+                 
+                console.log(res.data)
+                if (res.data.message) {
 
                     console.log(res.data)
                      refetch()

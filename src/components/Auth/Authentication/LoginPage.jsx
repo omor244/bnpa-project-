@@ -22,7 +22,7 @@ export default function LoginPage() {
 
     const onSubmit = async (data) => {
         try {
-            const { data: user } = await axios.get(`https://bnpa-backend.vercel.app/users/role?email=${data.email}`);
+            const { data: user } = await axios.get(`https://bnpa-mysql.vercel.app/users/role?email=${data.email}`);
 
             if (!user) {
                 Toast.fire({

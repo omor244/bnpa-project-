@@ -7,18 +7,22 @@ import Swal from "sweetalert2";
 
 // - Home, About BNPA, News & Event, BNPA 50 Years, Members, Gallery, Contact, SHOP
 
- export const navLinks = [
+export const navLinks = [
     { name: "Home", href: "/" },
-    {
-        name: "About BNPA",
-        href: "/about",
-    },
+    { name: "About BNPA", href: "/about" },
     { name: "News & Events", href: "/news" },
-     { name: "BNPA 50 Years", href: "/BNPA-50-Years" },
+    {
+        name: "BNPA 50 Years",
+        href: "#", // Changed to '#' since it's a dropdown trigger
+        subLinks: [
+        
+            { name: "Bangladesh post issue", href: "/bnpa-50/bd-issue" },
+        ]
+    },
     { name: "Members", href: "/members" },
     { name: "Gallery", href: "/gallery" },
     { name: "Contact", href: "/contact" },
-     { name: "Shop", href: "/SHOP" },
+    { name: "Shop", href: "/shop" },
 ];
 
 

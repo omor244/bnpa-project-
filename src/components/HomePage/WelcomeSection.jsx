@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, ShieldCheck } from 'lucide-react';
+import { ArrowRight, Info, Banknote, Printer, Layers } from 'lucide-react';
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
 import LoadingPage from '../LoadingPage/LoadingPage';
@@ -8,15 +8,17 @@ export default function WelcomeSection() {
     const { data: response, isLoading } = useQuery({
         queryKey: ['cards'],
         queryFn: async () => {
-            const { data } = await axios.get("https://bnpa-backend.vercel.app/new-issue");
+            const { data } = await axios.get("https://bnpa-mysql.vercel.app/new-issue");
             return data;
         }
     });
-
+    
+    console.log(response)
     if (isLoading) return <LoadingPage />;
 
-    // Get only the first item (the most recent one after sorting in backend)
-    const item = response && response.length > 0 ? response[0] : null;
+    // FIXED LOGIC: Ensure response exists and handle both Array or Single Object formats
+    const items = Array.isArray(response) ? response : (response ? [response] : []);
+    const item = items.length > 0 ? items[0] : null;
 
     if (!item) return null;
 
@@ -27,13 +29,10 @@ export default function WelcomeSection() {
 
                     {/* LEFT CONTENT */}
                     <div className="w-full lg:w-1/2 space-y-8">
-                       
-
                         <div className="relative inline-block">
                             <h2 className="text-5xl md:text-6xl font-black text-slate-900 mb-10 leading-tight">
                                 Welcome to <span className="text-[#26bba4]">BNPA</span>
                             </h2>
-                           
                         </div>
 
                         <p className="text-xl text-slate-500 font-semibold">
@@ -61,37 +60,74 @@ export default function WelcomeSection() {
                         </div>
                     </div>
 
-                    {/* RIGHT CONTENT */}
-                    <div className="w-full lg:w-1/2 text-center">
+                    {/* RIGHT CONTENT: RECENT ISSUE */}
+                    <div className="w-full lg:w-1/2 rounded-lg bg-slate-200 py-2 text-center">
                         <div className="mb-6">
-                            <h2 className="text-6xl md:text-7xl font-black my-4 text-slate-900">
+                            <h2 className="text-6xl md:text-6xl font-black my-4 text-slate-900">
                                 Recent <span className="text-[#26bba4]">Issue</span>
                             </h2>
                         </div>
 
-                        <div className="bg-white rounded-xl">
-                            {/* Fixed Height Container with Flex Centering */}
-                            <div className="relative group p-4 h-[350px] flex justify-center items-center bg-slate-50 rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                        <div className=" rounded-xl">
+                            {/* Image Container */}
+                            <div className="relative  p-4 h-[300px] flex justify-center items-center  rounded-2xl   ">
                                 <img
                                     src={item.image}
                                     alt={item.title}
-                                    // 'max-h-full' ensures it hits the 400px limit
-                                    // 'w-auto' maintains the correct aspect ratio
-                                    // 'object-cover' or 'object-contain' depending on your preference
-                                    className="max-h-full w-full object-contain rounded-lg shadow-md transition-transform duration-500 group-hover:scale-[1.02]"
+                                    className="max-h-full w-full object-contain rounded-lg transition-transform duration-500 hover:scale-[1.03]"
                                 />
                             </div>
 
                             {/* Details Section */}
-                            <div className="mt-8 space-y-2">
-                                <p className="text-lg md:text-xl font-bold text-slate-800">
-                                    Title : <span className="text-slate-600 font-normal">{item.title}</span>,
-                                    Date of Issue : <span className="text-slate-600 font-normal">{item.dateOfIssue}</span>
-                                </p>
-                                <p className="text-lg md:text-xl font-bold text-slate-800">
-                                    Designer : <span className="text-slate-600 font-normal">{item.designer}</span>,
-                                    Number of Postmark : <span className="text-slate-600 font-normal">{item.postmarkNumber}</span>
-                                </p>
+                            <div className="mt-8 space-y-4 text-left md:text-center max-w-lg mx-auto">
+                                <div className="space-y-1">
+                                    <h3 className="text-2xl font-black text-slate-900 leading-tight">
+                                        {item.title}
+                                    </h3>
+                                    <p className="text-[#26bba4] font-bold flex items-center justify-center gap-2">
+                                        Released: {item.dateOfIssue}
+                                    </p>
+                                </div>
+
+                                <div className="flex flex-col md:flex-row gap-6 py-4">
+                                    {/* Left Column */}
+                                    <ul className="flex-1 space-y-2">
+                                        <li className="flex items-center gap-2 text-sm text-slate-700">
+                                    
+                                            <span className="font-semibold">Number of Stamps:</span>
+                                            <span className="text-slate-500">{item.numStamps || 'N/A'}</span>
+                                        </li>
+                                        <li className="flex items-center gap-2 text-sm text-slate-700">
+                                           
+                                            <span className="font-semibold">Face Value:</span>
+                                            <span className="text-slate-500">{item.faceValue || 'N/A'}</span>
+                                        </li>
+                                        <li className="flex items-center gap-2 text-sm text-slate-700">
+                                          
+                                            <span className="font-semibold">Number of Postmarks:</span>
+                                            <span className="text-slate-500">{item.postmarkNumber || 'N/A'}</span>
+                                        </li>
+                                    </ul>
+
+                                    {/* Right Column */}
+                                    <ul className="flex-1 space-y-2">
+                                        <li className="flex items-start gap-2 text-sm text-slate-700">
+
+                                            <div className="flex  gap-1">
+                                                <span className="font-semibold">Designer:</span>
+                                                <span className="text-slate-500 break-all">{item.designer || 'N/A'}</span>
+                                            </div>
+                                        </li>
+                                        <li className="flex items-start gap-2 text-sm text-slate-700">
+                                           
+                                            <div className="flex  gap-1">
+                                                <span className="font-semibold">Printer:</span>
+                                                <span className="text-slate-500 ">{item.printers || 'N/A'} </span>
+                                            </div>
+                                        </li>
+                                       
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>

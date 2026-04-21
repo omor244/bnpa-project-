@@ -80,14 +80,7 @@ export const UserAuthSection = ({ isMobile = false }) => {
 
 
 
-// const menuItems = [
 
-  
-//     { name: 'Overview', path: '/dashboard', icon: LayoutDashboard },
-//     { name: 'Manage Users', path: '/dashboard/manage-users', icon: Users },
-//     { name: 'Reports', path: '/dashboard/reports', icon: FileText },
-//     { name: 'Admin Settings', path: '/dashboard/settings', icon: Settings },
-// ];
 
 export const SidebarContent = ({ setOpen }) => {
     
@@ -157,8 +150,114 @@ export const SidebarContent = ({ setOpen }) => {
                                         <span className="text-sm font-medium">Manage Users</span>
                                     </Link>
                                 </Button>
+                                <Button
+                                    key={"/dashboard/upload-gallery"}
+                                    asChild
+                                    variant="ghost"
+                                    onClick={() => setOpen(false)} // Close drawer on mobile click
+                                    className={cn(
+                                        "w-full justify-start gap-3 rounded-lg px-3 py-6 transition-all",
+                                        pathname === "/dashboard/upload-gallery"
+                                            ? "bg-[#26bba4] text-white hover:bg-[#1f9683] shadow-lg shadow-emerald-900/20"
+                                            : "text-slate-400 hover:bg-slate-900 hover:text-white"
+                                    )}
+                                >
+                                    <Link to={"/dashboard/upload-gallery"}>
+                                        <Users className={cn("h-5 w-5", pathname === '/dashboard/upload-gallery' ? "text-white" : "text-slate-400")} />
+                                        <span className="text-sm font-medium">Upload Gallery</span>
+                                    </Link>
+                                </Button>
+                                
+                                <Button
+                                    key={"/dashboard/Product-Listing"}
+                                    asChild
+                                    variant="ghost"
+                                    onClick={() => setOpen(false)} // Close drawer on mobile click
+                                    className={cn(
+                                        "w-full justify-start gap-3 rounded-lg px-3 py-6 transition-all",
+                                        pathname === "/dashboard/Product-Listing"
+                                            ? "bg-[#26bba4] text-white hover:bg-[#1f9683] shadow-lg shadow-emerald-900/20"
+                                            : "text-slate-400 hover:bg-slate-900 hover:text-white"
+                                    )}
+                                >
+                                    <Link to={"/dashboard/Product-Listing"}>
+                                        <Users className={cn("h-5 w-5", pathname === '/dashboard/Product-Listing' ? "text-white" : "text-slate-400")} />
+                                        <span className="text-sm font-medium">Product Listing</span>
+                                    </Link>
+                                </Button>
+                         
+                                <Button
+                                    key={"/dashboard/new-issue"}
+                                    asChild
+                                    variant="ghost"
+                                    onClick={() => setOpen(false)} // Close drawer on mobile click
+                                    className={cn(
+                                        "w-full justify-start gap-3 rounded-lg px-3 py-6 transition-all",
+                                        pathname === "/dashboard/new-issue"
+                                            ? "bg-[#26bba4] text-white hover:bg-[#1f9683] shadow-lg shadow-emerald-900/20"
+                                            : "text-slate-400 hover:bg-slate-900 hover:text-white"
+                                    )}
+                                >
+                                    <Link to={"/dashboard/new-issue"}>
+                                        <FileCheck className={cn("h-5 w-5", pathname === '/dashboard/new-issue' ? "text-white" : "text-slate-400")} />
+                                        <span className="text-sm font-medium">New Issue</span>
+                                    </Link>
+                                </Button>
 
 
+                                <Button
+                                    key={"/dashboard/events-issue"}
+                                    asChild
+                                    variant="ghost"
+                                    onClick={() => setOpen(false)} // Close drawer on mobile click
+                                    className={cn(
+                                        "w-full justify-start gap-3 rounded-lg px-3 py-6 transition-all",
+                                        pathname === "/dashboard/events-issue"
+                                            ? "bg-[#26bba4] text-white hover:bg-[#1f9683] shadow-lg shadow-emerald-900/20"
+                                            : "text-slate-400 hover:bg-slate-900 hover:text-white"
+                                    )}
+                                >
+                                    <Link to={"/dashboard/events-issue"}>
+                                        <FileCheck className={cn("h-5 w-5", pathname === '/dashboard/events-issue' ? "text-white" : "text-slate-400")} />
+                                        <span className="text-sm font-medium">Event Issue</span>
+                                    </Link>
+                                </Button>
+
+                                <Button
+                                    key={"/dashboard/latest-events-form"}
+                                    asChild
+                                    variant="ghost"
+                                    onClick={() => setOpen(false)} // Close drawer on mobile click
+                                    className={cn(
+                                        "w-full justify-start gap-3 rounded-lg px-3 py-6 transition-all",
+                                        pathname === "/dashboard/latest-events-form"
+                                            ? "bg-[#26bba4] text-white hover:bg-[#1f9683] shadow-lg shadow-emerald-900/20"
+                                            : "text-slate-400 hover:bg-slate-900 hover:text-white"
+                                    )}
+                                >
+                                    <Link to={"/dashboard/latest-events-form"}>
+                                        <FileCheck className={cn("h-5 w-5", pathname === '/dashboard/latest-events-form' ? "text-white" : "text-slate-400")} />
+                                        <span className="text-sm font-medium">Latest Event </span>
+                                    </Link>
+                                </Button>
+                                  
+                                <Button
+                                    key={"/dashboard/membership"}
+                                    asChild
+                                    variant="ghost"
+                                    onClick={() => setOpen(false)} // Close drawer on mobile click
+                                    className={cn(
+                                        "w-full justify-start gap-3 rounded-lg px-3 py-6 transition-all",
+                                        pathname === "/dashboard/membership"
+                                            ? "bg-[#26bba4] text-white hover:bg-[#1f9683] shadow-lg shadow-emerald-900/20"
+                                            : "text-slate-400 hover:bg-slate-900 hover:text-white"
+                                    )}
+                                >
+                                    <Link to={"/dashboard/membership"}>
+                                        <FileCheck className={cn("h-5 w-5", pathname === '/dashboard/membership' ? "text-white" : "text-slate-400")} />
+                                        <span className="text-sm font-medium">Membership</span>
+                                    </Link>
+                                </Button>
 
                             </>  :  <>
                                 
@@ -179,24 +278,12 @@ export const SidebarContent = ({ setOpen }) => {
                                             <span className="text-sm font-medium">Membership</span>
                                         </Link>
                                     </Button>
-                                    <Button
-                                        key={"/dashboard/new-issue"}
-                                        asChild
-                                        variant="ghost"
-                                        onClick={() => setOpen(false)} // Close drawer on mobile click
-                                        className={cn(
-                                            "w-full justify-start gap-3 rounded-lg px-3 py-6 transition-all",
-                                            pathname === "/dashboard/new-issue"
-                                                ? "bg-[#26bba4] text-white hover:bg-[#1f9683] shadow-lg shadow-emerald-900/20"
-                                                : "text-slate-400 hover:bg-slate-900 hover:text-white"
-                                        )}
-                                    >
-                                        <Link to={"/dashboard/new-issue"}>
-                                            <FileCheck className={cn("h-5 w-5", pathname === '/dashboard/new-issue' ? "text-white" : "text-slate-400")} />
-                                            <span className="text-sm font-medium">New Issue</span>
-                                        </Link>
-                                    </Button>
+
+
+
+                                   
                               
+                                    
                             </>
                             }   
                           

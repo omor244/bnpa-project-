@@ -1,4 +1,5 @@
-import LatestNews from "@/components/HomePage/LatestNews";
+import LatestNews from "@/components/News/LatestNews";
+
 
 
 const NewsPage = () => {
@@ -11,15 +12,12 @@ const NewsPage = () => {
                         News & <span className="text-[#26bba4]">Events</span>
                     </h1>
                     <div className="h-1.5 w-24 bg-[#26bba4] mx-auto rounded-full mb-6" />
-                    <p className="max-w-2xl mx-auto text-lg text-slate-600 font-light leading-relaxed">
-                        Stay updated with the latest happenings, community announcements,
-                        and upcoming cultural celebrations within the BASSA community.
-                    </p>
+                  
                 </div>
             </div>
 
             {/* Content Section */}
-            <div className="pb-12  mt-[-80px] px-22">
+            <div className="pb-12  mt-[-80px] px-10">
               <LatestNews/>
             </div>
 

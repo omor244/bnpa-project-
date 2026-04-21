@@ -1,5 +1,5 @@
 
-import { GetAllUserData, handleDeleteUser, handleStatusUpdate } from '@/Data/GetAllData/GetUserData';
+import {  handleDeleteUser, handleStatusUpdate } from '@/Data/GetAllData/GetUserData';
 import {
     Table,
     TableBody,
@@ -19,14 +19,25 @@ import { Button } from "@/components/ui/button";
 import { Trash2, UserCheck, Shield } from 'lucide-react';
 import { Badge } from "@/components/ui/badge";
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 
 
 const ManageUsers = () => {
    
-    const initialUsers = GetAllUserData();
+
+    const { data: users, isLoading, refetch } = useQuery({
+        queryKey: ['users'],
+        queryFn: async () => {
+            const { data } = await axios.get("https://bnpa-mysql.vercel.app/users");
+            return {data}; // Returning data directly for cleaner mapping
+        }
+    });
+
+
+    console.log(users)
     
-    
-    // if (initialUsers.isLoading) return <LoadingPage/>
+    if (isLoading) return <LoadingPage />
   
 
 
@@ -38,7 +49,7 @@ const ManageUsers = () => {
                     <h2 className="text-2xl font-bold tracking-tight">User Management</h2>
                     <p className="text-muted-foreground">Manage roles, approval status, and account access.</p>
                 </div>
-                <Badge variant="outline" className="px-3 py-1">Total Users: {initialUsers?.data?.length}</Badge>
+                <Badge variant="outline" className="px-3 py-1">Total Users: {users?.data.length}</Badge>
             </div>
 
             <div className="rounded-md border bg-white">
@@ -53,12 +64,12 @@ const ManageUsers = () => {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {initialUsers?.data?.map((user) => (
-                            <TableRow key={user._id} className="hover:bg-slate-50/50">
+                        {users.data?.map((user) => (
+                            <TableRow key={user.id} className="hover:bg-slate-50/50">
                                 <TableCell>
                                     <div className="flex flex-col">
                                         <span className="font-medium text-slate-900">{user.name}</span>
-                                        <span className="text-xs text-slate-500 font-mono">{user._id.slice(-6)}</span>
+                                        {/* <span className="text-xs text-slate-500 font-mono">{user?.id.slice(3)}</span> */}
                                     </div>
                                 </TableCell>
                                 <TableCell>
@@ -77,8 +88,8 @@ const ManageUsers = () => {
                                 </TableCell>
                                 <TableCell>
                                     <Select
-                                        defaultValue={user.status}
-                                        onValueChange={(value) => handleStatusUpdate(user._id, value, initialUsers.refetch)}
+                                        defaultValue={user?.status}
+                                        onValueChange={(value) => handleStatusUpdate(user.id, value, refetch)}
                                     >
                                         <SelectTrigger className={cn(
                                             "w-[130px] h-9 text-xs font-semibold uppercase",
@@ -86,7 +97,7 @@ const ManageUsers = () => {
                                         )}>
                                             <SelectValue />
                                         </SelectTrigger>
-                                        <SelectContent>
+                                        <SelectContent defaultValue="pending">
                                             <SelectItem value="padding">Pending</SelectItem>
                                             <SelectItem value="approve">Approved</SelectItem>
                                         </SelectContent>
@@ -97,7 +108,7 @@ const ManageUsers = () => {
                                         variant="ghost"
                                         size="icon"
                                         className="text-slate-400 hover:text-red-600 cursor-pointer hover:bg-red-50"
-                                        onClick={() => handleDeleteUser(user._id, initialUsers.refetch)}
+                                        onClick={() => handleDeleteUser(user.id, refetch)}
                                     >
                                         <Trash2 size={18} />
                                     </Button>

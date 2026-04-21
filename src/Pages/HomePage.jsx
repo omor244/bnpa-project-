@@ -1,7 +1,7 @@
 import FeatureGrid from '@/components/HomePage/FeatureGrid';
 import Hero from '@/components/HomePage/Hero';
 import JourneySection from '@/components/HomePage/JourneySection';
-import LatestNews from '@/components/HomePage/LatestNews';
+import LatestNewsSection from '@/components/HomePage/LatestNewsSection';
 import MembershipCTA from '@/components/HomePage/MembershipCTA';
 import MessageSection from '@/components/HomePage/MessageSection';
 import PhotoGallery from '@/components/HomePage/PhotoGallery';
@@ -17,7 +17,7 @@ const HomePage = () => {
             <JourneySection />
             <PhotoGallery />
             <MessageSection />
-            <LatestNews />
+            <LatestNewsSection/>
             <MembershipCTA/>
         </div>
     );

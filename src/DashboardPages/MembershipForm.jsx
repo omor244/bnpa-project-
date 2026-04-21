@@ -5,6 +5,7 @@ import { handleImageChange} from '@/Data/MembershipData';
 import { Imageupload } from '@/lib/utils';
 import useAxiosSecure from '@/components/Hooks/useAxiosSecure';
 import { Toast } from '@/Data/Data';
+import axios from 'axios';
 
 
 const MembershipForm = () => {
@@ -13,47 +14,55 @@ const MembershipForm = () => {
     const axiosSecure = useAxiosSecure() 
    
     const onSubmit = async (data) => {
+        const { address, cardPic, fullName, email, nid, memberType, mobile, profilePic } = data;
 
-      
-        const { address, cardPic, fullName, email, nid, memberType, mobile, profilePic } = data
+        try {
+            // --- STEP 1: UPLOAD CARD IMAGE ---
+            const cardFile = cardPic[0];
+           
+          
+            // --- STEP 2: UPLOAD PROFILE IMAGE ---
+            const profileFile = profilePic[0];
+             
+            const uploadedcard = await Imageupload(cardFile)
+            const uploadedprofile = await Imageupload(profileFile)
+          
+         
+         
+                const MemberFormData = {
+                    address,
+                    cardImage: uploadedcard, 
+                    fullName,
+                    email: email,
+                    nid,
+                    memberType,
+                    mobile,
+                    profileImage: uploadedprofile
+                };
 
-        const cardImageFile = cardPic[0]
-        const profileImageFile = profilePic[0]
-        const uploadCardImage = await Imageupload(cardImageFile)
-        const uploadProfileImage = await Imageupload(profileImageFile)
-        console.log("image", uploadCardImage, uploadProfileImage)
 
 
-        const MemberFormData = {
-            address,
-            cardImage: uploadCardImage,
-            fullName,
-            email: email,
-            nid,
-            memberType,
-            mobile,
-            profileImage: uploadProfileImage
-        }
+                const res = await axios.post("http://localhost:3000/membership", MemberFormData);
 
-      
-
-        const res = await axiosSecure.post("/membership", MemberFormData)
-
-        if (res.data.insertedId) {
-        
-            Toast.fire({
-                icon: 'success',
-                title: 'Application Submitted!',
-                text: 'Your BNPA membership request is being processed.',
-                background: '#ffffff',
-                iconColor: '#26bba4',
-                customClass: {
-                    title: 'text-slate-800 font-bold',
-                    popup: 'rounded-2xl shadow-xl border border-slate-100'
+                if (res.data.success) {
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Application Submitted!',
+                        text: 'Your BNPA membership request is being processed.',
+                        background: '#ffffff',
+                        iconColor: '#26bba4',
+                    });
+                    reset();
+                    setPreview({ profile: null, card: null });
                 }
+             
+        } catch (error) {
+            console.error("Submission Error:", error);
+            Toast.fire({
+                icon: 'error',
+                title: 'Submission Failed',
+                text: error.response?.data?.message || 'Check folder permissions (755) in cPanel.',
             });
-            reset();
-            setPreview({ profile: null, card: null })
         }
     };
    

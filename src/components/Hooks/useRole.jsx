@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import useAxiosSecure from "./useAxiosSecure";
 import LoadingPage from "../LoadingPage/LoadingPage";
 import useAuth from "./useAuth";
+import axios from "axios";
 
 
 
@@ -16,13 +17,13 @@ const useRole = () => {
         
         queryFn: async () => {
             
-            const { data } = await axiossecure.get(`http://localhost:3000/users/role?email=${user?.email}`)
-           
+            const  {data}  = await axios.get(`https://bnpa-mysql.vercel.app/users/role?email=${user?.email}`)
+            console.log("data found",data)
             return data.role
         }
     })
     
-   
+   console.log(role)
 
 
     if (isLoading) return <LoadingPage/>
