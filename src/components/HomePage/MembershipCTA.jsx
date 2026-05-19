@@ -16,7 +16,7 @@ export default function MembershipCTA() {
 
                     {/* Right Side: Download Button */}
                     <Link
-                        // You will need to update this path to your actual BNPA membership form
+                       
                         to="/files/BNPA-Membership-Form.pdf"
                         target='_blank'
                         className="group flex items-center gap-2 bg-white text-[#26bba4] font-bold py-3 px-8 rounded shadow-lg transition-all duration-300 hover:bg-slate-100 hover:scale-105 active:scale-95 uppercase tracking-wider text-sm"

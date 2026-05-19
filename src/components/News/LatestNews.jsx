@@ -1,29 +1,28 @@
 
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import { Calendar } from 'lucide-react';
 import { useLocation } from 'react-router';
 import LoadingPage from '../LoadingPage/LoadingPage';
 import EventCard from '../Card/EventCard';
+import useAxiosSecure from '../Hooks/useAxiosSecure';
 
 
 
 export default function LatestNews() {
 
     const location = useLocation()
-
+    const axiosSecure = useAxiosSecure()
     const { data: newsItems, isLoading, refetch } = useQuery({
         queryKey: ['newsItems'],
 
         queryFn: async () => {
 
-            const { data } = await axios.get("https://bnpa-mysql.vercel.app/latest-events")
+            const { data } = await axiosSecure("/latest-events")
 
             return { data, isLoading, refetch }
         }
     })
 
-    console.log(newsItems)
+    // console.log(newsItems)
 
     if (isLoading) return <LoadingPage />
 
@@ -44,7 +43,7 @@ export default function LatestNews() {
 
                 {/* News Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {newsItems.data.map((item) => <EventCard key={item._id} item={item} />)}
+                    {newsItems.data.map((item) => <EventCard key={item.id} item={item} />)}
                 </div>
             </div>
         </section>

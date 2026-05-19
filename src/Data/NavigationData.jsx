@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FileCheck, FileText, LayoutDashboard, LogOut, PlusCircle, Settings, ShieldCheck, User, Users } from "lucide-react";
+import { FileCheck,  LayoutDashboard, LogOut, PlusCircle, Settings, ShieldCheck, User, Users } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import useRole from "@/components/Hooks/useRole";
@@ -88,7 +88,7 @@ export const SidebarContent = ({ setOpen }) => {
     const { user, logOut } = useAuth()
     const { role } = useRole()
     
-    console.log("im ",role)
+    // console.log("im ", role)
     return (
 
 
@@ -224,19 +224,19 @@ export const SidebarContent = ({ setOpen }) => {
                                 </Button>
 
                                 <Button
-                                    key={"/dashboard/latest-events-form"}
+                                    key={"/dashboard/latest-events-manage"}
                                     asChild
                                     variant="ghost"
                                     onClick={() => setOpen(false)} // Close drawer on mobile click
                                     className={cn(
                                         "w-full justify-start gap-3 rounded-lg px-3 py-6 transition-all",
-                                        pathname === "/dashboard/latest-events-form"
+                                        pathname === "/dashboard/latest-events-manage"
                                             ? "bg-[#26bba4] text-white hover:bg-[#1f9683] shadow-lg shadow-emerald-900/20"
                                             : "text-slate-400 hover:bg-slate-900 hover:text-white"
                                     )}
                                 >
-                                    <Link to={"/dashboard/latest-events-form"}>
-                                        <FileCheck className={cn("h-5 w-5", pathname === '/dashboard/latest-events-form' ? "text-white" : "text-slate-400")} />
+                                    <Link to={"/dashboard/latest-events-manage"}>
+                                        <FileCheck className={cn("h-5 w-5", pathname === '/dashboard/latest-events-manage' ? "text-white" : "text-slate-400")} />
                                         <span className="text-sm font-medium">Latest Event </span>
                                     </Link>
                                 </Button>
@@ -256,6 +256,25 @@ export const SidebarContent = ({ setOpen }) => {
                                     <Link to={"/dashboard/membership"}>
                                         <FileCheck className={cn("h-5 w-5", pathname === '/dashboard/membership' ? "text-white" : "text-slate-400")} />
                                         <span className="text-sm font-medium">Membership</span>
+                                    </Link>
+                                </Button>
+
+
+                                <Button
+                                    key={"/dashboard/manage-members"}
+                                    asChild
+                                    variant="ghost"
+                                    onClick={() => setOpen(false)} // Close drawer on mobile click
+                                    className={cn(
+                                        "w-full justify-start gap-3 rounded-lg px-3 py-6 transition-all",
+                                        pathname === "/dashboard/manage-members"
+                                            ? "bg-[#26bba4] text-white hover:bg-[#1f9683] shadow-lg shadow-emerald-900/20"
+                                            : "text-slate-400 hover:bg-slate-900 hover:text-white"
+                                    )}
+                                >
+                                    <Link to={"/dashboard/manage-members"}>
+                                        <FileCheck className={cn("h-5 w-5", pathname === '/dashboard/manage-members' ? "text-white" : "text-slate-400")} />
+                                        <span className="text-sm font-medium">Manage Members</span>
                                     </Link>
                                 </Button>
 
@@ -291,7 +310,7 @@ export const SidebarContent = ({ setOpen }) => {
                     </div>
 
                     {/* Management Section */}
-                    <div>
+                    {/* <div>
                         <h4 className="mb-4 px-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
                             Management
                         </h4>
@@ -303,7 +322,7 @@ export const SidebarContent = ({ setOpen }) => {
                             <ShieldCheck size={20} />
                             <span className="text-sm font-medium">Permissions</span>
                         </Button>
-                    </div>
+                    </div> */}
                 </div>
             </ScrollArea>
 

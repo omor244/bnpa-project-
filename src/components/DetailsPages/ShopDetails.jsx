@@ -1,45 +1,101 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "react-router";
 import axios from "axios";
 import LoadingPage from "@/components/LoadingPage/LoadingPage";
-import { FaTag, FaTruck, FaUndoAlt, FaShieldAlt } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import Swal from "sweetalert2";
+import { handleAddToCart, Toast } from "@/Data/Data";
+import useAuth from "../Hooks/useAuth";
 
 const ShopDetails = () => {
+    const queryClient = useQueryClient();
     const { id } = useParams();
-
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [isZoomed, setIsZoomed] = useState(false); // State for popup
+    const {user} = useAuth()
     const { data: product, isLoading } = useQuery({
         queryKey: ['product', id],
         queryFn: async () => {
-            const { data } = await axios.get(`https://bnpa-shop-db.vercel.app/all-products/${id}`);
+            const { data } = await axios.get(`https://data.bnpa.bd/all-products/${id}`);
             return data.data;
         }
     });
 
+    useEffect(() => {
+        if (product?.photo) {
+            setSelectedImage(product.photo);
+        }
+    }, [product,]);
+
     if (isLoading) return <LoadingPage />;
     if (!product) return <div className="text-center py-20">Product not found</div>;
 
-    return (
-        <div className="max-w-6xl mx-auto p-4 md:p-8 font-sans bg-white">
-            {/* TOP SECTION: Gallery and Purchase Info */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-12">
+    let gallery = [];
+    try {
+        gallery = JSON.parse(product.multipleimage || "[]");
+        if (!gallery.includes(product.photo)) {
+            gallery = [product.photo, ...gallery];
+        }
+    } catch (e) {
+        gallery = [product.photo];
+    }
 
+ 
+
+    return (
+        <div className="max-w-11/12 mx-auto p-4 md:p-8 font-sans bg-white relative">
+
+            {/* Image Popup / Lightbox */}
+            {isZoomed && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 animate-in fade-in duration-300"
+                    onClick={() => setIsZoomed(false)}
+                >
+                    <button
+                        className="absolute top-6 right-6 text-white text-4xl hover:scale-110 transition-transform"
+                        onClick={() => setIsZoomed(false)}
+                    >
+                        ✕
+                    </button>
+                    <img
+                        src={selectedImage || product.photo}
+                        alt={product.title}
+                        className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-300"
+                    />
+                </div>
+            )}
+
+
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-12">
                 {/* Left: Gallery Part */}
-                <div className="md:col-span-7 flex flex-col items-center">
-                    <div className="w-full border rounded-lg overflow-hidden bg-slate-50 relative group">
+                <div className="md:col-span-6 flex flex-col">
+                    <div className="w-full border rounded-lg overflow-hidden bg-slate-50 relative group py-12 flex items-center justify-center">
                         <img
-                            src={product.photo}
+                            onClick={() => setIsZoomed(true)}
+                            src={selectedImage || product.photo}
                             alt={product.title}
-                            className="w-full h-auto object-contain max-h-[500px]"
+                            className="w-full h-full object-contain transition-all duration-300"
                         />
-                        <button className="absolute top-4 right-4 bg-white/80 p-2 rounded-full shadow-sm">
-                            🔍
-                        </button>
+
+                        {/* <button
+                            
+                            className="absolute top-4 right-4 bg-white/80 p-3 rounded-full shadow-md hover:bg-white transition-all hover:scale-110 active:scale-90"
+                        >
+                            <span className="text-xl">🔍</span>
+                        </button> */}
                     </div>
-                    {/* Small Thumbnails Placeholder */}
-                    <div className="flex gap-2 mt-4 self-start">
-                        <div className="w-16 h-16 border-2 border-[#26bba4] rounded cursor-pointer overflow-hidden">
-                            <img src={product.photo} className="w-full h-full object-cover" />
-                        </div>
+
+                    {/* Thumbnails */}
+                    <div className="flex flex-wrap gap-3 mt-12">
+                        {gallery.map((img, index) => (
+                            <div
+                                key={index}
+                                onClick={() => setSelectedImage(img)}
+                                className={`w-20 h-20 border-2 rounded-md cursor-pointer overflow-hidden transition-all ${(selectedImage === img) ? "border-[#26bba4] scale-105" : "border-transparent hover:border-gray-300"}`}
+                            >
+                                <img src={img} className="w-full h-full object-cover" alt={`Gallery ${index}`} />
+                            </div>
+                        ))}
                     </div>
                 </div>
 
@@ -48,78 +104,64 @@ const ShopDetails = () => {
                     <h1 className="text-2xl font-bold text-gray-900 mb-2 leading-tight">
                         {product.title}
                     </h1>
-                    {/* <p className="text-sm text-gray-500 mb-4 underline cursor-pointer hover:text-[#26bba4]">
-                        CIT Store (100% Positive Feedback)
-                    </p> */}
 
-                    <div className=" border-y border-gray-100 flex items-baseline gap-3">
-                        <span className="text-3xl font-bold text-gray-900"> ৳{product.price}</span>
-                       
+                    <div className="border-y border-gray-100 py-4 flex items-baseline gap-3">
+                        <span className="text-3xl font-bold text-gray-900">৳{product.price}</span>
                     </div>
 
-                    <div className="my-3 space-y-3">
+                    <div className="my-6 space-y-3">
                         <div className="flex gap-10 text-sm">
                             <span className="text-gray-500 w-20">Condition:</span>
                             <span className="font-bold text-gray-800 italic">"{product.con}"</span>
                         </div>
                         <div className="flex gap-10 text-sm">
                             <span className="text-gray-500 w-20">Category:</span>
-                            <span className="text-gray-800 font-medium">{product.category}</span>
+                            <span className="text-gray-800 font-medium uppercase">{product.category}</span>
                         </div>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="space-y-3 mt-8">
-                        <Link to={`/checkout/${product.id}`} className="  py-3 bg-[#26bba4] hover:bg-[#1f9e8a]  px-22  lg:px-32  text-white font-bold rounded-full  transition-all">
-                            Buy  Now
+                    <div onClick={() => handleAddToCart(product, user, queryClient)} className="mt-8">
+                        <Link
+                            // to={`/checkout/${product.id}`}
+                            to={``}
+                            
+                            className="inline-block text-center py-4 bg-[#26bba4] hover:bg-[#1f9e8a] w-full text-white font-bold rounded-full transition-all shadow-lg active:scale-95"
+                        >
+                            Add To Cart
                         </Link>
-                       
                     </div>
 
-                    <div className="mt-6  ">
-                        <h1 className="font-bold text-center text-lg pb-2">Shipping and Payment</h1>
-                    <div className="flex  gap-4 ">
-                        <span className="font-semibold text-gray-700">Shipping:</span>
-                        <div className=" text-sm">
-                                <p className="font-bold w-full">৳30 Registered Mail / GEP &  $5 International Mail (Registered)</p>
-                          
+                    {/* Shipping and Payment Info */}
+                    <div className="mt-8 p-4 border rounded-xl border-slate-100">
+                        <h2 className="font-bold text-lg pb-3 border-b mb-3">Shipping and Payment</h2>
+                        <div className="space-y-3">
+                            <div className="flex gap-4">
+                                <span className="font-semibold text-gray-600 text-sm">Shipping:</span>
+                                <p className="text-sm font-bold text-gray-800">৳30 Registered Mail / GEP & $5 International Mail (Registered)</p>
+                            </div>
+                            <div className="flex gap-4">
+                                <span className="font-semibold text-gray-600 text-sm">Delivery:</span>
+                                <p className="text-sm font-medium text-gray-800">Estimated between <span className="font-bold text-[#26bba4]">May 11 - May 25</span></p>
+                            </div>
                         </div>
-                    </div>
-                    <div className="flex items-center gap-4 mt-2">
-                        <span className="font-semibold text-gray-700">Delivery:</span>
-                        <div className="md:col-span-3 text-sm">
-                            <p className="font-medium text-gray-800">Estimated between <span className="font-bold">Mon, May 11 and Mon, May 25</span></p>
+                        <div className="mt-4">
+                            <img
+                                className="w-full h-auto rounded-lg"
+                                src="https://i.ibb.co.com/3yNhQpMR/Whats-App-Image-2026-04-21-at-3-00-18-PM.jpg"
+                                alt="Payment Methods Bangladesh"
+                            />
                         </div>
-                    </div>
-                    <div className="mt-2">
-                            <img className="lg:max-w-xl " src="https://i.ibb.co.com/3yNhQpMR/Whats-App-Image-2026-04-21-at-3-00-18-PM.jpg" alt="" />
-                    </div>
                     </div>
                 </div>
             </div>
 
-            {/* BOTTOM SECTION: Shipping, Returns, and Payments */}
-            {/* <div className="border-t pt-8">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Shipping, returns, and payments</h2>
-
-                <div className="space-y-6 max-w-4xl">
-                  
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <span className="font-semibold text-gray-700">Returns:</span>
-                        <div className="md:col-span-3 text-sm">
-                            <p className="font-medium text-gray-800">30 days returns. Buyer pays for return shipping.</p>
-                        </div>
-                    </div>
-
-             
-                 
-                </div>
-            </div> */}
-
             {/* Description Section */}
-            <div className="mt-12 p-6 bg-slate-50 rounded-lg">
-                <h3 className="font-bold text-lg mb-4 underline">Description</h3>
-                <p className="text-gray-700 leading-relaxed">{product.description}</p>
+            <div className="mt-12 p-8 bg-slate-50 rounded-2xl border border-slate-100">
+                <h3 className="font-bold text-xl mb-4 flex items-center gap-2">
+                    <span className="w-1 h-6 bg-[#26bba4] rounded-full"></span>
+                    Description
+                </h3>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{product.description}</p>
             </div>
         </div>
     );

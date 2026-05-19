@@ -8,6 +8,8 @@ import {
     ShieldCheck
 } from 'lucide-react';
 
+
+
 export const slides = [
     { id: 1, image: "https://i.ibb.co.com/nswbztCc/Whats-App-Image-2026-04-11-at-2-30-32-PM-3.jpg" },
     { id: 2, image: "https://i.ibb.co.com/sdbqwQcy/Whats-App-Image-2026-04-11-at-2-30-32-PM-2.jpg" },
@@ -17,6 +19,14 @@ export const slides = [
 export const bnpaMessages = [
     {
         id: 1,
+        text: "Philately is more than just a hobby; it's a study of our heritage. We welcome all enthusiasts to join our meetings in Dhaka and contribute to the promotion of philately across the nation.",
+        name: "Prof.Dr.Kazi Shariful Alam",
+        role: "Chief Patron",
+        image: "https://i.ibb.co.com/RTcTwdF9/Whats-App-Image-2026-04-27-at-4-47-52-PM.jpg", // Replace with actual image
+        highlight: false
+    },
+    {
+        id: 2,
         text: "It is a privilege to lead the BNPA as we continue to preserve the rich postal history of Bangladesh. Our association remains committed to fostering a vibrant community for philatelists of all ages.",
         name: "Abdullah Al Shafi Majumder",
         role: "President ",
@@ -24,11 +34,11 @@ export const bnpaMessages = [
         highlight: true
     },
     {
-        id: 2,
+        id: 3,
         text: "Philately is more than just a hobby; it's a study of our heritage. We welcome all enthusiasts to join our meetings in Dhaka and contribute to the promotion of philately across the nation.",
         name: "Morshed Hasan",
         role: "General Secretary ",
-        image: "https://i.ibb.co.com/8g6m4Z50/Whats-App-Image-2026-04-11-at-7-01-22-PM.jpg", // Replace with actual image
+        image: "https://i.ibb.co/PsVmCVVJ/Morshed-Hasan-passport-picture.png", // Replace with actual image
         highlight: false
     }
 ];
@@ -63,14 +73,14 @@ export const features = [
 
 
 export const galleryImages = [
-    { id: 1, src: "https://i.ibb.co.com/60FpMy2t/1.png" },
-    { id: 2, src: "https://i.ibb.co.com/yFLtpPRb/2.png" },
-    { id: 3, src: "https://i.ibb.co.com/RTnTCSK9/3.png" },
-    { id: 4, src: "https://i.ibb.co.com/CXPnCP1/4.png" },
-    { id: 5, src: "https://i.ibb.co.com/LH3X3Sh/5.png" },
-    { id: 6, src: "https://i.ibb.co.com/rGRc2qvz/6.png" },
-    { id: 7, src: "https://i.ibb.co.com/GfQdM9T6/7.png" },
-    { id: 8, src: "https://i.ibb.co.com/Q3MVm1m6/8.png" },
+    { id: 1, src: "https://www.bnpa.bd/image_file/image2.png" },
+    { id: 2, src: "https://www.bnpa.bd/image_file/image2.png" },
+    { id: 3, src: "https://www.bnpa.bd/image_file/image3.png" },
+    { id: 4, src: "https://www.bnpa.bd/image_file/image4.png" },
+    { id: 5, src: "https://www.bnpa.bd/image_file/image5.png" },
+    { id: 6, src: "https://www.bnpa.bd/image_file/image6.png" },
+    { id: 7, src: "https://www.bnpa.bd/image_file/image7.png" },
+    { id: 8, src: "https://www.bnpa.bd/image_file/image8.png" },
 ];
 
 

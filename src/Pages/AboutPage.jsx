@@ -4,9 +4,9 @@ import React from 'react';
 
 const AboutPage = () => {
     return (
-        <div>
+        <div className='bg-slate-50'>
             <AboutStory />
-            {/* <ExecutiveCommittee/> */}
+            <ExecutiveCommittee/>
         </div>
     );
 };

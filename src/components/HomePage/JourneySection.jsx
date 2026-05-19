@@ -9,7 +9,7 @@ export default function JourneySection() {
                         <div className="relative group">
                             <div className="absolute -inset-1 bg-gradient-to-r from-[#26bba4] to-blue-600 rounded-lg blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                             <img
-                                src="https://i.ibb.co.com/39HD0QzM/Whats-App-Image-2026-04-11-at-7-27-46-PM.jpg"
+                                src="https://www.bnpa.bd/image_file/image1.jpg"
                                 alt="BNPA Event"
                                 className="relative rounded-lg shadow-2xl w-full object-cover h-[300px] md:h-[450px]"
                             />

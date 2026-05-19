@@ -5,12 +5,13 @@ import { handleImageChange } from '@/Data/MembershipData'; // Using your existin
 import { Imageupload } from '@/lib/utils'; // Using your existing helper
 import { Toast } from '@/Data/Data'; // Using your existing Toast
 import axios from 'axios';
+import useAxiosSecure from '@/components/Hooks/useAxiosSecure';
 
 const UploadGalleryForm = () => {
     const [loading, setLoading] = useState(false);
     const [previews, setPreviews] = useState([]);
     const { register, handleSubmit, reset, formState: { errors } } = useForm();
-
+    const axiosSecure = useAxiosSecure()
     // Custom preview handler for Multiple Images
     const handleMultiplePreview = (e) => {
         const files = Array.from(e.target.files);
@@ -23,23 +24,25 @@ const UploadGalleryForm = () => {
         const { title, description, images } = data || {};
 
         try {
-            // --- STEP 1: UPLOAD ALL IMAGES ---
-            // Assuming your Imageupload helper handles one file at a time
+          
             const uploadPromises = Array.from(images).map(file => Imageupload(file));
             const uploadedUrls = await Promise.all(uploadPromises);
-
+        
+            // console.log(uploadedUrls)
             const galleryData = {
                 title,
                 description,
                 images: uploadedUrls // Array of secure URLs
             };
 
-       
-            console.log(galleryData)
+
+            // console.log(galleryData)
+
+          
             // --- STEP 2: SAVE TO DATABASE ---
-            const res = await axios.post("https://bnpa-mysql.vercel.app/upload-gallery", galleryData);
-                
-         
+            const res = await axiosSecure.post("/upload-gallery", galleryData);
+
+
             if (res.data.success) {
                 Toast.fire({
                     icon: 'success',

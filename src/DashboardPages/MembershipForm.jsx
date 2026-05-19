@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { Upload, User, Mail, MapPin, Phone, CreditCard, CheckCircle2 } from 'lucide-react';
 import { handleImageChange} from '@/Data/MembershipData';
 import { Imageupload } from '@/lib/utils';
-import useAxiosSecure from '@/components/Hooks/useAxiosSecure';
+// import useAxiosSecure from '@/components/Hooks/useAxiosSecure';
 import { Toast } from '@/Data/Data';
 import axios from 'axios';
 
@@ -11,17 +11,19 @@ import axios from 'axios';
 const MembershipForm = () => {
     const [preview, setPreview] = useState({ profile: null, card: null });
     const { register, handleSubmit, formState: { errors }, reset } = useForm();
-    const axiosSecure = useAxiosSecure() 
+    const [loading, setloading ] = useState(false)
+    // const axiosSecure = useAxiosSecure() 
    
     const onSubmit = async (data) => {
-        const { address, cardPic, fullName, email, nid, memberType, mobile, profilePic } = data;
 
+        const { address, cardPic, fullName, email, nid, memberType, mobile, profilePic, membershipId } = data;
+         setloading(true)
         try {
-            // --- STEP 1: UPLOAD CARD IMAGE ---
+           
             const cardFile = cardPic[0];
            
           
-            // --- STEP 2: UPLOAD PROFILE IMAGE ---
+           
             const profileFile = profilePic[0];
              
             const uploadedcard = await Imageupload(cardFile)
@@ -37,14 +39,19 @@ const MembershipForm = () => {
                     nid,
                     memberType,
                     mobile,
-                    profileImage: uploadedprofile
+                    profileImage: uploadedprofile, 
+                    membershipId,
                 };
+ 
+            console.log(MemberFormData)
 
+          
 
-
-                const res = await axios.post("http://localhost:3000/membership", MemberFormData);
-
-                if (res.data.success) {
+            const res = await axios.post("https://api.bnpa.bd/membership", MemberFormData);
+       
+          
+            if (res.data.success) {
+                    setloading(false)
                     Toast.fire({
                         icon: 'success',
                         title: 'Application Submitted!',
@@ -55,6 +62,15 @@ const MembershipForm = () => {
                     reset();
                     setPreview({ profile: null, card: null });
                 }
+                
+                if (res.data.message == "Already Submitted") {
+                setloading(false)
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Submission Failed',
+                    text: res.data?.message,
+                });
+            }
              
         } catch (error) {
             console.error("Submission Error:", error);
@@ -133,7 +149,17 @@ const MembershipForm = () => {
                         </div>
 
                         {/* Section 2: Address & Type */}
-                        <div className="space-y-2">
+                        <div className=" space-y-2">
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                                    <CreditCard size={16} className="text-[#26bba4]" />MemberShip ID 
+                                </label>
+                                <input
+                                    {...register("membershipId", { required: "MemberShip ID  is required" })}
+                                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#26bba4] outline-none transition-all"
+                                    placeholder="MemberShip ID Number"
+                                />
+                            </div>
                             <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
                                 <MapPin size={16} className="text-[#26bba4]" /> Postal Address
                             </label>
@@ -143,6 +169,8 @@ const MembershipForm = () => {
                                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#26bba4] outline-none transition-all"
                                 placeholder="Full mailing address"
                             />
+
+                          
                         </div>
 
                         <div className="space-y-4">
@@ -212,10 +240,11 @@ const MembershipForm = () => {
                         {/* Submit Button */}
                         <button
                             type="submit"
+
                             className="w-full bg-[#26bba4] cursor-pointer text-white font-bold py-4 rounded-xl shadow-lg hover:bg-[#1f9d8a] transition-all transform hover:scale-[1.01] active:scale-95 flex items-center justify-center gap-2 text-lg"
                         >
                             <CheckCircle2 size={22} />
-                            Submit Membership Application
+                            {loading ? <> <p>loading...</p></> : <> Submit Membership Application </>}   
                         </button>
                     </form>
                 </div>

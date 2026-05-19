@@ -1,34 +1,50 @@
-import { committee } from '@/Data/Data';
+import { committeeMembers } from '@/Data/Data';
 import React from 'react';
-import { CommitteeCard } from '../Card/CommitteeCard';
+
+
+
 
 
 
 
 export default function ExecutiveCommittee() {
+
     return (
-        <section className="py-20 bg-slate-50">
-            <div className="container mx-auto px-6 lg:px-24">
+        <section className="py-20  min-h-screen  ">
+            <div className="max-w-[1300px] mx-auto px-4">
 
-                {/* Header */}
-                <div className="text-center mb-16">
-                    <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
-                        BASSA Executive Committee Members 2022 – 2024
-                    </h2>
-                    <div className="h-1.5 w-24 bg-[#26bba4] mx-auto rounded-full" />
-                </div>
 
-                {/* Leadership (President & VP) */}
-                <div className="flex flex-wrap justify-center gap-12 mb-20">
-                    {committee.leadership.map((person, index) => (
-                        <CommitteeCard key={index} {...person} isLarge={true} />
-                    ))}
-                </div>
+                {/* --- DYNAMIC GRID SYSTEM --- */}
+                <div className="flex  flex-col items-center space-y-24 bg-white p-8 rounded-2xl shadow-sm border border-slate-100 shadow-[#26bba4] hover:shadow-2xl transition-shadow">
+                    <h3 className="text-3xl md:text-5xl font-semibold text-center text-slate-900 mb-24">Organizing Committee 2025 - 2027 </h3>
 
-                {/* General Members Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-16 gap-x-8">
-                    {committee.members.map((person, index) => (
-                        <CommitteeCard key={index} {...person} isLarge={false} />
+                    {committeeMembers.map((row, index) => (
+                        <div
+                            key={index}
+                            className={`lg:grid ${row.cols}  gap-x-8 gap-y-12 w-full max-w-fit items-start justify-items-center`}
+                        >
+                            {row.members.map((member, mIdx) => (
+                                <div key={mIdx} className="flex flex-col items-center text-center ">
+
+                                    <div className={`
+                relative w-48 h-48 rounded-full  overflow-hidden  border-2 p-1
+                    ${row.role === 'chief_patron' || row.role === 'president' ? 'border-[#26bba4] scale-110 ' : 'border-slate-200'}
+                  `}>
+                                        <img src={member.image} alt={member.name} className="w-full hover:scale-110 transition-transform duration-700 h-full object-cover rounded-full" />
+                                    </div>
+
+                                    <div className="mt-4 space-y-1 mb-8 ">
+                                        <h4 className={`text-sm leading-tight text-slate-900 ${row.role === 'chief_patron' || row.role === 'president' ? 'font-black' : 'font-bold'}`}>
+                                            {member.name}
+                                        </h4>
+                                        <p className="text-[11px] font-medium text-slate-500 uppercase tracking-tighter">
+                                            {member.designation}
+                                        </p>
+                                    </div>
+
+                                </div>
+                            ))}
+                        </div>
                     ))}
                 </div>
 

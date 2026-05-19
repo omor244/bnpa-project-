@@ -1,8 +1,14 @@
+import { handleAddToCart } from "@/Data/Data";
 import { HiOutlineArrowNarrowRight } from "react-icons/hi";
 import { Link } from "react-router";
+import useAuth from "../Hooks/useAuth";
+import { useQueryClient } from "@tanstack/react-query";
 
 
-const ShopCard = ({ product}) => {
+const ShopCard = ({ product, refetch }) => {
+    const queryClient = useQueryClient();
+    const {user }= useAuth()
+
     return (
         <div>
             <div
@@ -31,17 +37,19 @@ const ShopCard = ({ product}) => {
                         {product.description}
                     </p> */}
 
-                    <div className="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between">
+                    <div onClick={() => handleAddToCart(product, user, queryClient)} className="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between">
                         <span className="text-xl font-bold text-slate-900">
                            ৳{product.price}
                         </span>
 
                         {/* Buy Now Button -> Redirects to Checkout */}
                         <Link
-                            to={`/checkout/${product.id}`}
+                            // to={`/checkout/${product.id}`}
+                            to={``}
+                            
                             className="bg-[#26bba4] hover:bg-[#1f9e8a] text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-md active:scale-95"
                         >
-                            Buy Now
+                            Add To Cart
                         </Link>
                     </div>
                     

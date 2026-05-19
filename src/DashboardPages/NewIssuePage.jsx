@@ -1,269 +1,256 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { Calendar, User, Hash, Image as ImageIcon, Upload, X, FileWarning, Banknote, Printer, Layers } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Toast } from '@/Data/Data';
-import { Imageupload } from '@/lib/utils';
-import useAxiosSecure from '@/components/Hooks/useAxiosSecure';
-import axios from 'axios';
+import LoadingPage from "@/components/LoadingPage/LoadingPage";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import { useState, useRef } from "react";
+import { useForm } from "react-hook-form";
+import { FaEdit, FaTrashAlt } from "react-icons/fa";
 
-export default function NewIssuePage() {
-    const [preview, setPreview] = useState(null);
+import Swal from "sweetalert2";
+import { Toast } from "@/Data/Data";
+import { Imageupload } from "@/lib/utils";
+import { Link } from "react-router";
+import NewIssueModal from "@/DashboardComponets/NewIssue/NewIssueModal";
+import useAxiosSecure from "@/components/Hooks/useAxiosSecure";
+
+const API = "https://api.bnpa.bd"; 
+
+const NewIssuePage = () => {
+    const queryClient = useQueryClient();
+    const axiosSecure = useAxiosSecure()
+    const [selectedIssue, setSelectedIssue] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [isUploading, setIsUploading] = useState(false);
+    const fileInputRef = useRef(null);
+
    
-    const { register, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm();
+    const { data: issues, isLoading, refetch } = useQuery({
+        queryKey: ["new-issue"],
+        queryFn: async () => {
+            const { data } = await axios.get(`${API}/new-issue-get`);
+            return data;
+        },
+    });
 
+
+    // console.log(issues)
+
+    const { register, handleSubmit, reset } = useForm();
+
+    
+    const handleEditClick = (item) => {
+        setSelectedIssue(item);
+        setImagePreview(item.image);
+        setSelectedFile(null);
+
+        reset({
+            title: item.title,
+            dateOfIssue: item.dateOfIssue ? item.dateOfIssue.split("T")[0] : "",
+            designer: item.designer,
+            faceValue: item.faceValue,
+            printers: item.printers || "",
+            numStamps: item.numStamps || "",
+            postmarkNumber: item.postmarkNumber || "",
+            size: item.size,
+            perforation: item?.perforation,
+            quantity: item?.quantity,
+            NumberofStampEachSheet: item?.NumberofStampEachSheet,
+            color: item?.color,
+            processPrinting: item?.processPrinting
+        });
+
+        document.getElementById("edit_issue_modal").showModal();
+    };
+
+  
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            const fileSizeKB = file.size / 1024;
-            const MAX_KB = 3000;
-            if (fileSizeKB > MAX_KB) {
-                Toast.fire({
-                    icon: 'warning',
-                    title: 'File Too Large',
-                    text: `Image must be less than ${MAX_KB} KB (3MB).`,
-                });
-                e.target.value = null;
-                setPreview(null);
-                setValue("image", null);
-                return;
-            }
-
-            setValue("image", file);
-            const reader = new FileReader();
-            reader.onloadend = () => setPreview(reader.result);
-            reader.readAsDataURL(file);
+            setSelectedFile(file);
+            setImagePreview(URL.createObjectURL(file));
         }
     };
 
-    const onSubmit = async (data) => {
-        // data will now include: title, dateOfIssue, designer, postmarkNumber, numStamps, faceValue, printers
-        const { title, dateOfIssue, designer, image, postmarkNumber, numStamps, faceValue, printers } = data
-          
+  
+    const updateMutation = useMutation({
+        mutationFn: async (payload) => {
+            const res = await axios.post(
+                `https://api.bnpa.bd/new-issue-update/${selectedIssue.id}`,
+                payload
+            );
+       
+            return res.data; 
+        },
+       
+        
+        onSuccess: (data) => {
+            console.log("Response:", data);
+
+            Toast.fire({
+                icon: "success",
+                title: data?.message || "Updated successfully",
+            });
+
+            document.getElementById("edit_issue_modal").close();
+
+            queryClient.invalidateQueries(["new-issue"]);
+
+           
+            setIsUploading(false);
+            setSelectedFile(null);
+            setSelectedIssue(null);
+        },
+
+        onError: (err) => {
+            console.error(err);
+            setIsUploading(false);
+            document.getElementById("edit_issue_modal").close();
+            Swal.fire(
+                "Update Failed",
+                err.response?.data?.message || "Server error",
+                "error"
+            );
+        },
+    });
+
+    
+    const onSubmit = async (formData) => {
+        if (!selectedIssue) return;
+
+        setIsUploading(true);
+
         try {
-            const uploadedimage = await Imageupload(image)
+            let imageUrl = selectedIssue.image;
 
-            const issueData = {
-                title,
-                dateOfIssue,
-                designer,
-                image: uploadedimage,
-                postmarkNumber,
-                numStamps,     // New field
-                faceValue,     // New field
-                printers       // New field
+            if (selectedFile) {
+                imageUrl = await Imageupload(selectedFile);
             }
-            console.log("form issue",issueData)
 
-            const res = await axios.post("https://bnpa-mysql.vercel.app/new-issue", issueData)
-
-            if (res.data.insertedId) {
-                Toast.fire({
-                    icon: 'success',
-                    title: 'Issue Published',
-                    text: 'The new philatelic issue has been added to BNPA records.',
-                    timer: 2000
-                });
-                reset();
-                setPreview(null);
-            }
+            const payload = {
+                ...formData,
+                image: imageUrl,
+            };
+             
+            console.log(payload)
+            updateMutation.mutate(payload);
         } catch (error) {
-            Toast.fire({ icon: 'error', title: 'Error saving issue' });
+            console.error(error);
+            setIsUploading(false);
+
+            Swal.fire("Error", "Image upload failed", "error");
         }
     };
+
+    const handelDelete = async (id) => {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This will permanently delete this issue!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#26bba4",
+            cancelButtonColor: "#ef4444",
+            confirmButtonText: "Yes, delete it!"
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const res = await axios.get(`https://api.bnpa.bd/new-issue-delete/${id}`);
+ 
+                    console.log(res)
+                    if (!res.data.success) {
+                        console.error("Server Error:", res.status);
+                        Toast.fire({
+                            icon: "error",
+                            title: `Server returned ${res.status}. Check backend routing.`
+                        });
+                        return;
+                    }
+
+                  
+
+                    
+
+                    if (res.data.success) {
+                        Toast.fire({
+                            icon: "success",
+                            title: "Issue deleted successfully"
+                        });
+                        refetch();
+                    }
+                } catch (error) {
+                    console.error("Network Error:", error);
+                    Toast.fire({
+                        icon: "error",
+                        title: "Could not connect to the server."
+                    });
+                }
+            }
+        });
+    }
+    if (isLoading) return <LoadingPage />;
 
     return (
-        <div className="min-h-screen bg-slate-50/50 p-6 lg:p-12">
-            <div className="max-w-5xl mx-auto">
-                <div className="mb-8 text-center md:text-left">
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tight uppercase">New Issue</h1>
-                    <p className="text-slate-500">Bangladesh National Philatelic Association Archive</p>
+      <div className="max-w-7xl mx-auto p-6 bg-white min-h-screen font-sans">
+ 
+    <div className="lg:flex justify-between items-center mb-8 border-b pb-4">
+        <h2 className="text-2xl font-bold text-slate-800">
+            Manage <span className="text-[#26bba4]">New Issues</span>
+                </h2>
+                
+                <div className="mt-10">
+                    <Link to={'new-issue-form'} className={"bg-[#26bba4] text-white px-6 py-2 rounded-lg font-bold cursor-pointer"}>Add New Issue</Link>
                 </div>
+    </div>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-                    <div className="flex flex-col xl:flex-row gap-8">
+  
+    <div className="overflow-x-auto shadow-xl rounded-2xl border border-slate-100">
+        <table className="table w-full">
+            <thead className="bg-slate-50 text-slate-600 uppercase text-xs font-black">
+                <tr>
+                    <th className="py-4 px-6 text-left">Stamp</th>
+                    <th className="text-left">Details</th>
+                    <th className="text-left">Value</th>
+                    <th className="text-left">Designer</th>
+                    <th className="text-center">Actions</th>
+                </tr>
+            </thead>
 
-                        {/* Left Side: Form Fields */}
-                        <div className="flex-1 space-y-6">
-                            <Card className="border-slate-200 shadow-sm">
-                                <CardContent className="pt-6 space-y-5">
+            <tbody>
+                {issues?.map((item) => (
+                    <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="py-4 px-6">
+                            <img
+                                src={item.image}
+                                className="w-12 h-12 mask mask-squircle object-cover"
+                                alt={item.title}
+                            />
+                        </td>
 
-                                    {/* Row 1: Title */}
-                                    <div className="space-y-1">
-                                        <label className="text-sm font-bold text-slate-700">Title of Issue</label>
-                                        <div className="relative">
-                                            <ImageIcon className="absolute left-3 top-3 text-slate-400" size={18} />
-                                            <Input
-                                                {...register("title", { required: "Title is required" })}
-                                                placeholder="e.g., Golden Jubilee of Independence"
-                                                className="pl-10 h-11 focus-visible:ring-[#26bba4]"
-                                            />
-                                        </div>
-                                    </div>
+                        <td className="font-bold text-slate-700">{item.title}</td>
+                        <td className="text-slate-600">{item.faceValue}</td>
+                        <td className="text-slate-500">{item.designer}</td>
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        {/* Row 2: Date */}
-                                        <div className="space-y-1">
-                                            <label className="text-sm font-bold text-slate-700">Date of Issue</label>
-                                            <div className="relative">
-                                                <Calendar className="absolute left-3 top-3 text-slate-400" size={18} />
-                                                <Input
-                                                    type="date"
-                                                    {...register("dateOfIssue", { required: "Date is required" })}
-                                                    className="pl-10 h-11 focus-visible:ring-[#26bba4]"
-                                                />
-                                            </div>
-                                        </div>
+                        <td className="text-center">
+                            <button
+                                onClick={() => handleEditClick(item)}
+                                className="p-2 text-blue-600 bg-blue-50 rounded-lg mr-2 hover:bg-blue-100 transition-colors"
+                            >
+                                <FaEdit />
+                            </button>
 
-                                        {/* Row 2: Designer */}
-                                        <div className="space-y-1">
-                                            <label className="text-sm font-bold text-slate-700">Designer</label>
-                                            <div className="relative">
-                                                <User className="absolute left-3 top-3 text-slate-400" size={18} />
-                                                <Input
-                                                    {...register("designer", { required: "Designer is required" })}
-                                                    placeholder="Artist Name"
-                                                    className="pl-10 h-11 focus-visible:ring-[#26bba4]"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
+                            <button  onClick={() => handelDelete(item.id)} className="p-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
+                                <FaTrashAlt />
+                            </button>
+                        </td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    </div>
 
-                                    {/* New Section: Technical Details */}
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        {/* Number of Stamps */}
-                                        <div className="space-y-1">
-                                            <label className="text-sm font-bold text-slate-700">Number of Stamps</label>
-                                            <div className="relative">
-                                                <Layers className="absolute left-3 top-3 text-slate-400" size={18} />
-                                                <Input
-                                                    type="number"
-                                                    {...register("numStamps", { required: true })}
-                                                    placeholder="Total stamps in set"
-                                                    className="pl-10 h-11 focus-visible:ring-[#26bba4]"
-                                                />
-                                            </div>
-                                        </div>
+    {/* Modal */}
+    <NewIssueModal handleImageChange={handleImageChange} imagePreview={imagePreview} register={register} handleSubmit={handleSubmit} isUploading={isUploading} updateMutation={updateMutation} fileInputRef={fileInputRef} onSubmit={onSubmit} />
+</div>
+    );
+};
 
-                                        {/* Face Value */}
-                                        <div className="space-y-1">
-                                            <label className="text-sm font-bold text-slate-700">Face Value (BDT)</label>
-                                            <div className="relative">
-                                                <Banknote className="absolute left-3 top-3 text-slate-400" size={18} />
-                                                <Input
-                                                    type="text"
-                                                    {...register("faceValue", { required: true })}
-                                                    placeholder="e.g., 10.00 or 50.00"
-                                                    className="pl-10 h-11 focus-visible:ring-[#26bba4]"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        {/* Printers */}
-                                        <div className="space-y-1">
-                                            <label className="text-sm font-bold text-slate-700">Printers</label>
-                                            <div className="relative">
-                                                <Printer className="absolute left-3 top-3 text-slate-400" size={18} />
-                                                <Input
-                                                    {...register("printers", { required: true })}
-                                                    placeholder="Security Printing Press"
-                                                    className="pl-10 h-11 focus-visible:ring-[#26bba4]"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        {/* Postmark Number */}
-                                        <div className="space-y-1">
-                                            <label className="text-sm font-bold text-slate-700">Number of Postmark</label>
-                                            <div className="relative">
-                                                <Hash className="absolute left-3 top-3 text-slate-400" size={18} />
-                                                <Input
-                                                    type="number"
-                                                    {...register("postmarkNumber", { required: true })}
-                                                    placeholder="0"
-                                                    className="pl-10 h-11 focus-visible:ring-[#26bba4]"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <div className="flex items-center justify-end gap-4 pt-4">
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    onClick={() => { reset(); setPreview(null); }}
-                                    className="px-6"
-                                >
-                                    Clear Form
-                                </Button>
-                                <Button
-                                    disabled={isSubmitting}
-                                    className="px-10 h-12 bg-[#26bba4] hover:bg-[#1f9683] text-white font-bold rounded-xl shadow-md transition-all"
-                                >
-                                    {isSubmitting ? "Processing..." : "Publish to BNPA"}
-                                </Button>
-                            </div>
-                        </div>
-
-                        {/* Right Side: Photo Upload Preview */}
-                        <div className="xl:w-[540px] shrink-0">
-                            <Card className="border-slate-200 shadow-sm">
-                                <CardHeader className="pb-3 border-b bg-slate-50/50">
-                                    <CardTitle className="text-xs font-black uppercase tracking-widest text-slate-500">
-                                        Issue Image (Preview)
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent className="pt-6">
-                                    <div className="flex justify-center">
-                                        {preview ? (
-                                            <div className="relative border-4 border-white shadow-xl rounded-lg overflow-hidden group">
-                                                <img
-                                                    src={preview}
-                                                    alt="Stamp Preview"
-                                                    className="w-[500px] h-auto block transition-transform duration-300 group-hover:scale-[1.02]"
-                                                />
-                                                <button
-                                                    type="button"
-                                                    onClick={() => { setPreview(null); setValue("image", null); }}
-                                                    className="absolute top-4 right-4 p-2 bg-red-600 text-white rounded-full hover:scale-110 transition-all shadow-lg"
-                                                >
-                                                    <X size={20} />
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <label className="flex flex-col items-center justify-center w-[500px] aspect-[4/3] rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100 hover:border-[#26bba4] transition-all cursor-pointer">
-                                                <div className="text-center p-10">
-                                                    <Upload className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-                                                    <p className="text-sm font-bold text-slate-600 uppercase">Click to Upload</p>
-                                                    <p className="text-xs text-slate-400 mt-2">Max Size: 3MB</p>
-                                                </div>
-                                                <input
-                                                    type="file"
-                                                    className="hidden"
-                                                    accept="image/*"
-                                                    onChange={handleImageChange}
-                                                />
-                                            </label>
-                                        )}
-                                    </div>
-                                    <div className="mt-6 flex items-start gap-3 p-4 bg-amber-50 rounded-lg border border-amber-100">
-                                        <FileWarning className="text-amber-600 mt-0.5" size={18} />
-                                        <p className="text-[12px] text-amber-800 leading-relaxed font-medium">
-                                            High-resolution scans preferred for the BNPA archive.
-                                        </p>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    )
-}
+export default NewIssuePage;

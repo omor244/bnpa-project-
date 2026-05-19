@@ -1,7 +1,6 @@
 import { bnpaMessages } from '@/Data/DataForHome';
 import React from 'react';
 
-// This is the data structure you should update in your @/Data/DataForHome file
 
 
 export default function MessageSection() {
@@ -17,7 +16,7 @@ export default function MessageSection() {
                 </div>
 
                 {/* Cards Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
                     {bnpaMessages.map((m) => (
                         <div
                             key={m.id}

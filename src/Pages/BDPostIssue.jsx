@@ -4,14 +4,16 @@ import { FileStack } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
+import useAxiosSecure from '@/components/Hooks/useAxiosSecure';
 
 const BDPostIssue = () => {
+    const axiosSecure = useAxiosSecure()
     const { data: issue, isLoading, refetch } = useQuery({
         queryKey: ['newsItems'],
 
         queryFn: async () => {
 
-            const { data } = await axios.get("https://bnpa-mysql.vercel.app/events-issue")
+            const { data } = await axiosSecure("/events-issue")
  
             return { data, isLoading, refetch }
         }
@@ -21,10 +23,10 @@ const BDPostIssue = () => {
 
     if (isLoading) return <LoadingPage />
     return (
-        <div className="min-h-screen bg-slate-50/50 ">
+        <div className="min-h-screen  bg-slate-50/50 ">
             {/* Header Section */}
             <div className="bg-white border-b border-slate-200 mb-10">
-                <div className="pl-38  px-4 py-12">
+                <div className="lg:pl-38  px-4 py-12">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="p-2 bg-[#26bba4]/10 rounded-lg">
                             <FileStack className="text-[#26bba4]" size={28} />

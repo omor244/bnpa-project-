@@ -1,7 +1,6 @@
-// import React, { useState, useEffect } from 'react';
+
 import { galleryImages } from '@/Data/DataForHome';
-import { ChevronUp } from 'lucide-react';
-import { Link } from 'react-router';
+
 
 
 

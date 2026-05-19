@@ -60,36 +60,8 @@ const AboutStory = () => {
                 </div>
             </section>
 
-            {/* 3. Governance & Objectives (Professional Cards) */}
-            <section className="py-16 bg-slate-50">
-                <div className="container mx-auto px-6 lg:px-24">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-                        {/* Governance Card */}
-                        <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-                            <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-3">
-                                <span className="w-8 h-8 rounded-lg bg-green-100 text-[#26bba4] flex items-center justify-center text-sm">01</span>
-                                Mission & Promotion
-                            </h3>
-                            <p className="text-slate-600 text-sm leading-relaxed">
-                                BNPA's primary mission is to promote the art of philately across Bangladesh. We organize national exhibitions, workshops, and auctions to encourage collectors and preserve the postal heritage of our nation for future generations.
-                            </p>
-                        </div>
-
-                        {/* Administration Card */}
-                        <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-                            <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-3">
-                                <span className="w-8 h-8 rounded-lg bg-green-100 text-[#26bba4] flex items-center justify-center text-sm">02</span>
-                                Management
-                            </h3>
-                            <p className="text-slate-600 text-sm leading-relaxed">
-                                As a non-profit and non-government entity, BNPA is managed by an Executive Committee elected by its members. Our operations are supported through membership subscriptions and community-driven initiatives dedicated to philatelic research.
-                            </p>
-                        </div>
-
-                    </div>
-                </div>
-            </section>
+      
+         
         </main>
     );
 };

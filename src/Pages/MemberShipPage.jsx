@@ -1,19 +1,23 @@
 import MemberShipCard from '@/components/Card/MemberShipCard';
+import useAxiosSecure from '@/components/Hooks/useAxiosSecure';
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import React from 'react';
 
 const MemberShipPage = () => {
+    const axiosSecure = useAxiosSecure()
     const { data: members, isLoading } = useQuery({
         queryKey: ['membershipData'],
         queryFn: async () => {
-            const { data } = await axios.get("https://bnpa-mysql.vercel.app/membership");
-            return data; // Returning data directly for cleaner mapping
+            const { data } = await axiosSecure("/api/membership-status");
+            return data; 
         }
     });
 
     if (isLoading) return <LoadingPage />;
+
+    // console.log(members)
 
     return (
         <div className="max-w-10/12 mx-auto px-4 py-10">
@@ -26,7 +30,7 @@ const MemberShipPage = () => {
                 {members?.map((member) => <MemberShipCard key={member.id} member={member}/> )}
             </div>
 
-            {/* Empty State */}
+         
             {members?.length === 0 && (
                 <div className="text-center py-20 text-gray-500">
                     No members found.

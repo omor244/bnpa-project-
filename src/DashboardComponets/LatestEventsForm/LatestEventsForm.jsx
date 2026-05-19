@@ -14,15 +14,17 @@ import {
 import Swal from 'sweetalert2';
 import { Imageupload } from '@/lib/utils';
 import axios from 'axios';
+import { useNavigate } from 'react-router';
 
 export default function LatestEventsForm() {
     const [galleryPreviews, setGalleryPreviews] = useState([]);
     const [loading, setloading] = useState(false)
+    const navitage = useNavigate()
     const {
         register,
         handleSubmit,
         formState: { errors },
-        reset, 
+        reset,
     } = useForm();
 
     // Handle the visual preview for multiple images
@@ -46,21 +48,21 @@ export default function LatestEventsForm() {
                 galleryFiles.map(file => Imageupload(file))
             );
 
-         
+
             const payload = {
                 ...data,
-                thumbnail: uploadthum, 
-                gallery: uploadGallery  
+                thumbnail: uploadthum,
+                gallery: uploadGallery
             };
 
-         
-             
-            const res = await axios.post("https://bnpa-mysql.vercel.app/latest-events", payload)
+
+
+            const res = await axios.post("https://api.bnpa.bd/latest-events", payload)
             console.log("CIT Submission Payload:", payload);
-              
+
             console.log(res.data)
             if (res.data.success) {
-                 setloading(false)
+                setloading(false)
                 Swal.fire({
                     toast: true,
                     position: 'top-end',
@@ -73,11 +75,11 @@ export default function LatestEventsForm() {
                     color: '#0f172a',
                     iconColor: '#26bba4'
                 });
-    
+
                 reset();
                 setGalleryPreviews([]);
             }
-         
+
 
         } catch (error) {
             console.error("Upload failed:", error);
@@ -101,9 +103,9 @@ export default function LatestEventsForm() {
                         </h2>
                         <p className="text-slate-500 font-medium mt-1">Creators Information Technologies Control Panel</p>
                     </div>
-                    <div className="px-5 py-2 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
+                    <div onClick={() => navitage(-1)} className="px-5 cursor-pointer py-2 bg-white rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
                         <div className="w-3 h-3 bg-[#26bba4] rounded-full animate-pulse"></div>
-                        <span className="text-xs font-bold text-slate-700 uppercase tracking-widest">Live Server v2.0</span>
+                        <span  className="text-xs font-bold text-slate-700 uppercase tracking-widest">Go back </span>
                     </div>
                 </div>
 
@@ -223,7 +225,7 @@ export default function LatestEventsForm() {
                             type="submit"
                             className="w-full py-5 bg-[#0f172a] text-white rounded-[2rem] font-black text-lg flex items-center justify-center gap-3 hover:bg-[#26bba4] transition-all duration-300 active:scale-95 shadow-xl shadow-slate-900/10"
                         >
-                            {loading  ? "Loading..." : <> <Send size={20} /> PUBLISH CONTENT </> }  
+                            {loading ? "Loading..." : <> <Send size={20} /> PUBLISH CONTENT </>}
                         </button>
                     </div>
 

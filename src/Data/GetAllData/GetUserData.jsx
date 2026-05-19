@@ -9,7 +9,7 @@ import Swal from "sweetalert2";
 
 
 export const handleStatusUpdate = async (userId, newStatus, refetch ) => {
-    console.log(userId, "and", newStatus)
+    // console.log(userId, "and", newStatus)
 
 
     Swal.fire({
@@ -26,12 +26,12 @@ export const handleStatusUpdate = async (userId, newStatus, refetch ) => {
             if (result.isConfirmed) {
                 try {
 
-                    const res = await axios.patch(`https://bnpa-mysql.vercel.app/users/${userId}`, { newStatus })
+                    const res = await axios.post(`https://api.bnpa.bd/users/${userId}`, { newStatus })
                        
-                    console.log(res)
+                    // console.log(res)
                     if (res.data.affectedRows) {
 
-                        console.log(res.data)
+                        // console.log(res.data)
                          refetch()
                         Swal.fire({
                             title: "Updated!",
@@ -78,9 +78,9 @@ export const handleDeleteUser = async (userId, refetch) => {
         if (result.isConfirmed) {
             try {
 
-                const res = await axios.delete(`https://bnpa-mysql.vercel.app/users/${userId}`)
+                const res = await axios.get(`https://api.bnpa.bd/users/${userId}`)
                  
-                console.log(res.data)
+                // console.log(res.data)
                 if (res.data.message) {
 
                     console.log(res.data)

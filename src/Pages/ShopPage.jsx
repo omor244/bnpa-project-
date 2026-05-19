@@ -7,12 +7,12 @@ import axios from "axios";
 const ShopPage = () => {
     const [page, setPage] = useState(1);
     const limit = 20; 
-
-    const { data: shops, isLoading, isPlaceholderData } = useQuery({
-        // Adding 'page' to queryKey is critical for refetching
+    
+    const { data: shops, isLoading, isPlaceholderData, refetch } = useQuery({
+       
         queryKey: ['shops', page],
         queryFn: async () => {
-            const { data } = await axios.get(`http://localhost:3000/all-products?page=${page}&limit=${limit}`);
+            const { data } = await axios.get(`https://data.bnpa.bd/all-products?page=${page}&limit=${limit}`);
             return data;
         },
         placeholderData: (previousData) => previousData, // Keeps UI stable while loading next page
@@ -34,7 +34,7 @@ const ShopPage = () => {
             {/* Product Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 min-h-[600px]">
                 {products.map((product) => (
-                    <ShopCard key={product.id} product={product} />
+                    <ShopCard key={product.id} product={product} refetch={refetch} />
                 ))}
             </div>
 

@@ -3,24 +3,30 @@ import { ArrowRight, Info, Banknote, Printer, Layers } from 'lucide-react';
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
 import LoadingPage from '../LoadingPage/LoadingPage';
+import useAxiosSecure from '../Hooks/useAxiosSecure';
 
 export default function WelcomeSection() {
+    const axiosSecure = useAxiosSecure()
     const { data: response, isLoading } = useQuery({
         queryKey: ['cards'],
         queryFn: async () => {
-            const { data } = await axios.get("https://bnpa-mysql.vercel.app/new-issue");
+            const { data } = await axios("https://api.bnpa.bd/new-issue-get");
+            
             return data;
         }
     });
-    
-    console.log(response)
+
+
     if (isLoading) return <LoadingPage />;
 
-    // FIXED LOGIC: Ensure response exists and handle both Array or Single Object formats
+
+
     const items = Array.isArray(response) ? response : (response ? [response] : []);
     const item = items.length > 0 ? items[0] : null;
 
     if (!item) return null;
+
+    
 
     return (
         <section className="relative py-16 md:py-24 bg-white overflow-hidden">
@@ -60,72 +66,102 @@ export default function WelcomeSection() {
                         </div>
                     </div>
 
+
                     {/* RIGHT CONTENT: RECENT ISSUE */}
-                    <div className="w-full lg:w-1/2 rounded-lg bg-slate-200 py-2 text-center">
+                    <div className="w-full lg:w-1/2 rounded-lg bg-slate-200 py-2 text-center shadow-sm border border-slate-300">
                         <div className="mb-6">
-                            <h2 className="text-6xl md:text-6xl font-black my-4 text-slate-900">
+                            <h2 className="text-5xl md:text-6xl font-black my-4 text-slate-900">
                                 Recent <span className="text-[#26bba4]">Issue</span>
                             </h2>
                         </div>
 
-                        <div className=" rounded-xl">
+                        <div className="rounded-xl px-4">
                             {/* Image Container */}
-                            <div className="relative  p-4 h-[300px] flex justify-center items-center  rounded-2xl   ">
+                            <div className="relative p-4 h-[320px] flex justify-center items-center bg-white/50 rounded-2xl border border-slate-300/50">
                                 <img
                                     src={item.image}
                                     alt={item.title}
-                                    className="max-h-full w-full object-contain rounded-lg transition-transform duration-500 hover:scale-[1.03]"
+                                    className="max-h-full w-auto object-contain rounded-lg transition-transform duration-500 hover:scale-[1.03] drop-shadow-md"
                                 />
                             </div>
 
                             {/* Details Section */}
-                            <div className="mt-8 space-y-4 text-left md:text-center max-w-lg mx-auto">
-                                <div className="space-y-1">
-                                    <h3 className="text-2xl font-black text-slate-900 leading-tight">
+                            <div className="mt-8 space-y-4 text-left max-w-2xl mx-auto pb-6">
+                                <div className="space-y-1 text-center border-b border-slate-300 pb-4">
+                                    <h3 className="text-2xl font-black text-slate-900 leading-tight uppercase tracking-tight">
                                         {item.title}
                                     </h3>
-                                    <p className="text-[#26bba4] font-bold flex items-center justify-center gap-2">
-                                        Released: {item.dateOfIssue}
+                                    <p className="text-[#26bba4] font-bold text-sm tracking-wide">
+                                        Date of Issue: {item.dateOfIssue ?
+                                            new Date(item.dateOfIssue).toLocaleDateString('en-GB', {
+                                                day: '2-digit',
+                                                month: 'long',
+                                                year: 'numeric'
+                                            }) : "N/A"}
                                     </p>
                                 </div>
 
-                                <div className="flex flex-col md:flex-row gap-6 py-4">
-                                    {/* Left Column */}
-                                    <ul className="flex-1 space-y-2">
-                                        <li className="flex items-center gap-2 text-sm text-slate-700">
-                                    
-                                            <span className="font-semibold">Number of Stamps:</span>
-                                            <span className="text-slate-500">{item.numStamps || 'N/A'}</span>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 pt-2 text-sm">
+                                    {/* Column 1: Physical & Quantity */}
+                                    <ul className="space-y-2">
+                                        <li className="flex  gap-1">
+                                            <span className="font-bold text-black">Number of Stamps:</span>
+                                            <span className="text-slate-600">{item.numStamps}</span>
                                         </li>
-                                        <li className="flex items-center gap-2 text-sm text-slate-700">
-                                           
-                                            <span className="font-semibold">Face Value:</span>
-                                            <span className="text-slate-500">{item.faceValue || 'N/A'}</span>
+                                        <li className="flex  gap-1">
+                                            <span className="font-bold text-black">Face Value:</span>
+                                            <span className=" text-slate-600">{item.faceValue || 'N/A'}</span>
                                         </li>
-                                        <li className="flex items-center gap-2 text-sm text-slate-700">
-                                          
-                                            <span className="font-semibold">Number of Postmarks:</span>
-                                            <span className="text-slate-500">{item.postmarkNumber || 'N/A'}</span>
+                                        <li className="flex  gap-1">
+                                            <span className="font-bold text-black">Postmarks:</span>
+                                            <span className="text-slate-600">{item.postmarkNumber || 'N/A'}</span>
+                                        </li>
+                                        <li className="flex  gap-1">
+                                            <span className="font-bold text-black">Size:</span>
+                                            <span className="text-slate-600">{item.size}</span>
+                                        </li>
+                                        <li className="flex  gap-1">
+                                            <span className="font-bold text-black">Perforation:</span>
+                                            <span className="text-slate-600">{item.perforation || 'N/A'}</span>
+                                        </li>
+
+
+                                        <li className="flex  gap-1">
+                                            <span className="font-bold text-black">Number of Stamps In Each Sheet:</span>
+                                            <span className="text-slate-600">{item?.NumberofStampEachSheet || 'N/A'}</span>
                                         </li>
                                     </ul>
 
-                                    {/* Right Column */}
-                                    <ul className="flex-1 space-y-2">
-                                        <li className="flex items-start gap-2 text-sm text-slate-700">
-
+                                    {/* Column 2: Production Details */}
+                                    <ul className="space-y-2 text-sm">
+                                        <li className="flex  gap-1">
+                                            <span className="font-bold text-black">Quantity:</span>
+                                            <span className="text-slate-600">{item.quantity || 'N/A'}</span>
+                                        </li>
+                                        <li className="flex  gap-1">
+                                            <span className="font-bold text-black">Color:</span>
+                                            <span className="text-slate-600">{item.color || 'N/A'}</span>
+                                        </li>
+                                        <li className="">
+                                            <span className="font-bold text-black ">Printing Process:</span>
+                                            <span className="text-slate-600 pl-1">{item.processPrinting || 'N/A'}</span>
+                                        </li>
+                                        <li>
                                             <div className="flex  gap-1">
-                                                <span className="font-semibold">Designer:</span>
+                                                <span className="font-bold text-black">Designer:</span>
                                                 <span className="text-slate-500 break-all">{item.designer || 'N/A'}</span>
                                             </div>
                                         </li>
-                                        <li className="flex items-start gap-2 text-sm text-slate-700">
-                                           
+                                        <li className="flex items-start gap-2 text-sm ">
                                             <div className="flex  gap-1">
-                                                <span className="font-semibold">Printer:</span>
+
+                                                <span className="font-bold text-black">Printer:</span>
+
                                                 <span className="text-slate-500 ">{item.printers || 'N/A'} </span>
+
                                             </div>
+
                                         </li>
-                                       
                                     </ul>
                                 </div>
                             </div>

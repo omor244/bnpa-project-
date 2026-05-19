@@ -5,8 +5,10 @@ import { useQuery } from "@tanstack/react-query";
 import { HiOutlineArrowLeft, HiOutlineCollection, HiX } from "react-icons/hi"; // Added HiX for close button
 import { useNavigate } from "react-router";
 import { useState } from "react"; // Added useState
+import useAxiosSecure from "../Hooks/useAxiosSecure";
 
 const GalleryDetails = () => {
+    const axiosSecure = useAxiosSecure()
     const { id } = useParams();
     const navigate = useNavigate();
     const [selectedImage, setSelectedImage] = useState(null); // State for modal
@@ -14,7 +16,7 @@ const GalleryDetails = () => {
     const { data: gellary, isLoading } = useQuery({
         queryKey: ['Gellary-Details', id],
         queryFn: async () => {
-            const { data } = await axios.get(`https://bnpa-mysql.vercel.app/upload-gallery/${id}`);
+            const { data } = await axiosSecure(`/upload-gallery/${id}`);
             return data;
         }
     });
@@ -24,7 +26,7 @@ const GalleryDetails = () => {
     const images = gellary?.images ? JSON.parse(gellary.images) : [];
 
     const handelimage = (image) => {
-        setSelectedImage(image); // Open modal with clicked image
+        setSelectedImage(image); 
     };
 
     return (
@@ -63,7 +65,7 @@ const GalleryDetails = () => {
                         <div
                             key={index}
                             // Updated width to 300px and height to 200px
-                            className="group relative w-[300px] h-[200px] rounded-2xl overflow-hidden bg-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 mx-auto"
+                            className="group relative w-[250px] lg:w-[300px] h-[200px] rounded-2xl overflow-hidden bg-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 mx-auto"
                         >
                             <img
                                 src={imgUrl}

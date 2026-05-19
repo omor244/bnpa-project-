@@ -7,7 +7,7 @@ import { Toast } from '@/Data/Data';
 
 export default function EventIssueUpload() {
 
-    
+
     const {
         register,
         handleSubmit,
@@ -23,13 +23,13 @@ export default function EventIssueUpload() {
             ...data,
             image: uploadedimage
         };
-            
+
         console.log(finalData)
 
-        const res = await axios.post("https://bnpa-mysql.vercel.app/events-issue", finalData)
-          console.log(res.data)
+        const res = await axios.post("https://api.bnpa.bd/events-issue", finalData)
+        console.log(res.data)
         if (res.data.insertedId) {
-            
+
             Toast.fire({
                 icon: 'success',
                 title: 'Issue Published!',
@@ -47,6 +47,7 @@ export default function EventIssueUpload() {
         console.log("Final Data for Submission:", finalData);
         reset();
     };
+
 
     return (
         <section className="py-16 bg-slate-50 min-h-screen">

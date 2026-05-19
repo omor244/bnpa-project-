@@ -3,16 +3,17 @@ import axios from 'axios';
 import React from 'react';
 import { useParams, Link } from 'react-router';
 import { Calendar, Tag, Share2, ArrowLeft, Clock, MapPin } from 'lucide-react';
+import useAxiosSecure from '../Hooks/useAxiosSecure';
 
 const NewsEventDetails = () => {
     const { id } = useParams();
-      
+    const axiosSecure = useAxiosSecure()
   
     const { data: newsItemsdetails, isLoading } = useQuery({
         queryKey: ['newsItemsDetails', id],
         queryFn: async () => {
           
-            const { data } = await axios.get(`https://bnpa-mysql.vercel.app/latest-events/${id}`);
+            const { data } = await axiosSecure(`/latest-events/${id}`);
             return data;
         }
     });

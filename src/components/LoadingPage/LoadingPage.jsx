@@ -1,7 +1,4 @@
-
-
 const LoadingPage = () => {
-    
     return (
         <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white">
             <div className="relative flex flex-col items-center">
@@ -20,7 +17,7 @@ const LoadingPage = () => {
 
                 {/* Progress Bar Track */}
                 <div className="w-48 h-1 bg-slate-100 rounded-full overflow-hidden">
-                    {/* Animated Progress Fill */}
+                  
                     <div className="h-full bg-[#26bba4] animate-loading-bar rounded-full" />
                 </div>
 
@@ -29,18 +26,6 @@ const LoadingPage = () => {
                     Loading Experience
                 </p>
             </div>
-
-            {/* Tailwind Custom Keyframes (Add these to your tailwind.config.js if not working) */}
-            <style jsx>{`
-                @keyframes loading-bar {
-                    0% { width: 0%; transform: translateX(-100%); }
-                    50% { width: 50%; transform: translateX(0%); }
-                    100% { width: 100%; transform: translateX(100%); }
-                }
-                .animate-loading-bar {
-                    animation: loading-bar 2s infinite ease-in-out;
-                }
-            `}</style>
         </div>
     );
 };

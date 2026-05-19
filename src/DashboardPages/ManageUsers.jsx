@@ -21,21 +21,22 @@ import { Badge } from "@/components/ui/badge";
 import LoadingPage from '@/components/LoadingPage/LoadingPage';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import useAxiosSecure from '@/components/Hooks/useAxiosSecure';
 
 
 const ManageUsers = () => {
-   
+    const axiosSecure = useAxiosSecure()
 
     const { data: users, isLoading, refetch } = useQuery({
         queryKey: ['users'],
         queryFn: async () => {
-            const { data } = await axios.get("https://bnpa-mysql.vercel.app/users");
-            return {data}; // Returning data directly for cleaner mapping
+            const { data } = await axiosSecure("/users");
+            return {data}; 
         }
     });
 
 
-    console.log(users)
+    // console.log(users)
     
     if (isLoading) return <LoadingPage />
   

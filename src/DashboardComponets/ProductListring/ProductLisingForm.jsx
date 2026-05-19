@@ -5,73 +5,88 @@ import axios from "axios";
 import { Toast } from "@/Data/Data";
 import Swal from "sweetalert2";
 
-const ProductListing = () => {
+const ProductListingForm = () => {
     const [preview, setPreview] = useState(null);
+    const [multiplePreviews, setMultiplePreviews] = useState([]); // State for gallery previews
     const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
 
+    // Handle Main Single Photo
     const handleImageChange = (e) => {
-        const file = e.target.files[0]; // Fixed: e.target.files[0] to get the actual file
+        const file = e.target.files[0];
         if (file) {
-            // 1. Create a preview for the UI
             const reader = new FileReader();
             reader.onloadend = () => {
                 setPreview(reader.result);
             };
             reader.readAsDataURL(file);
-
-            // 2. Store the ACTUAL file object in React Hook Form for imgbb
             setValue("photo", file);
+        }
+    };
+
+    // Handle Multiple Photos (Gallery)
+    const handleMultipleImagesChange = (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length > 0) {
+            // Create previews for UI
+            const filePreviews = files.map(file => URL.createObjectURL(file));
+            setMultiplePreviews(filePreviews);
+
+            // Store the array of file objects
+            setValue("multipleimage", files);
         }
     };
 
     const onSubmit = async (data) => {
         try {
-            // 1. Uploading image to imgbb
-            const imageUrl = await Imageupload(data.photo);
 
-            if (!imageUrl) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Image Upload Failed',
-                    text: 'Could not get a URL from imgbb.',
-                });
-                return;
+
+            // 1. Upload Main Image
+            const mainImageUrl = await Imageupload(data.photo);
+
+            // 2. Upload Multiple Images (Gallery)
+            let galleryUrls = [];
+            if (data.multipleimage && data.multipleimage.length > 0) {
+                const uploadPromises = data.multipleimage.map(file => Imageupload(file));
+                galleryUrls = await Promise.all(uploadPromises);
             }
+
+         
 
             const finalData = {
                 ...data,
-                photo: imageUrl
+                photo: mainImageUrl,
+                multipleimage: galleryUrls // Sent to backend as an array of strings
             };
 
-            // 2. Posting to your Backend
-            const res = await axios.post("https://bnpa-shop-db.vercel.app/add-product", finalData);
-           
-            console.log(res)
-          
-            if (res.status === 201 || res.status === 200) {
-                console.log("Server Response:", res.data);
+            
 
-                // 4. Success Message using SweetAlert2
+
+   
+            // 3. Post to Backend
+            const res = await axios.post("https://data.bnpa.bd/add-product", finalData);
+
+            if (res.status === 201 || res.status === 200) {
+
                 Toast.fire({
                     title: 'Success!',
-                    text: 'Product listed successfully.',
+                    text: 'Product and Gallery listed successfully.',
                     icon: 'success',
-                    confirmButtonColor: '#26bba4', // Using your signature CIT color
+                    confirmButtonColor: '#26bba4',
                     timer: 2000
                 });
 
                 reset();
                 setPreview(null);
+                setMultiplePreviews([]);
             }
 
         } catch (error) {
+            Swal.close();
             console.error("Submission failed:", error);
-
-            // Error Message
             Swal.fire({
                 icon: 'error',
                 title: 'Submission Failed',
-                text: error.response?.data?.message || 'Something went wrong on the server.',
+                text: error.response?.data?.message || 'Something went wrong.',
                 confirmButtonColor: '#ef4444',
             });
         }
@@ -96,9 +111,9 @@ const ProductListing = () => {
                     {errors.title && <span className="text-red-500 text-xs">{errors.title.message}</span>}
                 </div>
 
-                {/* 2. Photo Upload */}
+                {/* 2. Main Photo Upload */}
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Product Photo</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Main Product Photo</label>
                     <input
                         type="file"
                         accept="image/*"
@@ -108,12 +123,31 @@ const ProductListing = () => {
                     {preview && (
                         <div className="relative w-32 h-32 mt-3">
                             <img src={preview} alt="Preview" className="w-full h-full object-cover rounded-lg border shadow-sm" />
-                            <div className="absolute top-1 right-1 bg-[#26bba4] text-white text-[10px] px-1 rounded">Preview</div>
+                            <div className="absolute top-1 right-1 bg-[#26bba4] text-white text-[10px] px-1 rounded">Main</div>
                         </div>
                     )}
                 </div>
 
-                {/* 3. Description */}
+                {/* 3. Multiple Gallery Photos */}
+                <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Product Gallery (Multiple)</label>
+                    <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleMultipleImagesChange}
+                        className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#26bba4]/10 file:text-[#26bba4] hover:file:bg-[#26bba4]/20 cursor-pointer"
+                    />
+                    {multiplePreviews.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-3">
+                            {multiplePreviews.map((src, i) => (
+                                <img key={i} src={src} className="w-16 h-16 object-cover rounded-lg border shadow-sm" alt={`Gallery ${i}`} />
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* 4. Description */}
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
                     <textarea
@@ -125,7 +159,7 @@ const ProductListing = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* 4. Item Category */}
+                    {/* 5. Item Category */}
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
                         <input
@@ -135,7 +169,7 @@ const ProductListing = () => {
                         />
                     </div>
 
-                    {/* 5. Price */}
+                    {/* 6. Price */}
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Price (৳)</label>
                         <input
@@ -147,7 +181,7 @@ const ProductListing = () => {
                     </div>
                 </div>
 
-                {/* 6. Condition */}
+                {/* 7. Condition */}
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Condition</label>
                     <input
@@ -161,11 +195,11 @@ const ProductListing = () => {
                     type="submit"
                     className="w-full cursor-pointer py-3 bg-[#26bba4] text-white font-bold rounded-lg hover:bg-[#1f9e8a] transition-all shadow-lg active:scale-95 mt-4"
                 >
-                    List Product
+                    List Product & Gallery
                 </button>
             </form>
         </div>
     );
 };
 
-export default ProductListing;
+export default ProductListingForm;

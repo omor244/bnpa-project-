@@ -1,15 +1,14 @@
 import LoadingPage from "@/components/LoadingPage/LoadingPage";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import { Link } from "react-router"; // or "next/link" if using Next.js
-import { HiOutlineArrowNarrowRight, HiOutlinePhotograph } from "react-icons/hi";
 import GalleryCard from "@/components/Card/GalleryCard";
+import useAxiosSecure from "@/components/Hooks/useAxiosSecure";
 
 const GalleryPage = () => {
+    const axiosSecure = useAxiosSecure()
     const { data: gellary, isLoading } = useQuery({
         queryKey: ['gellary'],
         queryFn: async () => {
-            const { data } = await axios.get("https://bnpa-mysql.vercel.app/upload-gallery");
+            const { data } = await axiosSecure("/upload-gallery");
             return data;
         }
     });
@@ -31,7 +30,7 @@ const GalleryPage = () => {
                   
                 </div>
 
-                {/* 4-Column Grid */}
+           
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 max-w-11/12 mx-auto gap-8">
                     {gellaryes.map((item) => {
                         // Handle JSON stringified images from MySQL

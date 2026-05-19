@@ -1,13 +1,7 @@
 import { Link, NavLink } from "react-router";
-import { Menu, ChevronDown } from "lucide-react";
-import {
-    NavigationMenu,
-    NavigationMenuContent,
-    NavigationMenuItem,
-    NavigationMenuLink,
-    NavigationMenuList,
-    NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
+import { Menu, ChevronDown, ShoppingCart } from "lucide-react"; // Added ShoppingCart
+import axios from "axios"; // Added for fetching
+
 import {
     Sheet,
     SheetContent,
@@ -20,21 +14,48 @@ import Logo from "../Logo/Logo";
 import { navLinks } from "@/Data/Data";
 import useAuth from "../Hooks/useAuth";
 import { UserAuthSection } from "@/Data/NavigationData";
+import DesktopNavigation from "./DesktopNavigation";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Navbar() {
     const { user } = useAuth();
+   
+
+    const { data: cartItems, isLoading } = useQuery({
+        
+        queryKey: ['cart-items-in-nav', user?.email, localStorage.getItem('guest_cart_id')],
+
+        queryFn: async () => {
+            // Re-check the ID right when the function runs
+            const currentGuestId = localStorage.getItem('guest_cart_id');
+            const identifier = user?.email || currentGuestId;
+
+            if (!identifier) return { data: [] };
+
+            const { data } = await axios.get(`https://data.bnpa.bd/add-cart?email=${identifier}`);
+            return data;
+        },
+
+        // Re-check the ID for the 'enabled' logic
+        enabled: !!(user?.email || localStorage.getItem('guest_cart_id')),
+        refetchOnWindowFocus: true, // Optional: updates if they come back to the tab
+        retry: false
+    });
+
+    // 2. Ensure your cartCount handles the data structure correctly
+    // Using ?. to prevent "cannot read property length of undefined"
+    const cartCount = cartItems?.data?.length || cartItems?.length || 0;
 
     return (
         <div className="sticky top-0 z-50 w-full bg-white border-b border-slate-100">
             <div className="lg:max-w-[92%] lg:mx-auto">
                 <div className="flex h-20 items-center justify-between px-4 lg:px-0">
 
-                    {/* Logo Section - Large Screens */}
+                    {/* Logo Section */}
                     <div className="shrink-0 hidden lg:block">
                         <Logo />
                     </div>
 
-                    {/* BNPA Text - Mobile Screens */}
                     <div className="flex h-18 lg:hidden">
                         <Link to="/" className="flex items-center text-center space-x-2">
                             <h1 className="text-4xl sm:text-5xl text-[#26bba4] font-bold">B N P A</h1>
@@ -42,67 +63,22 @@ export default function Navbar() {
                     </div>
 
                     {/* Desktop Navigation */}
-                    <div className="hidden lg:flex items-center space-x-2">
-                        <nav className="flex items-center">
-                            {/* NavigationMenu wrapper must handle the relative positioning for the content */}
-                            <NavigationMenu className="relative z-10" viewport={false}>
-                                <NavigationMenuList className="flex flex-row gap-1 list-none">
-                                    {navLinks.map((link) => (
-                                        <NavigationMenuItem key={link.name}>
-                                            {link.subLinks ? (
-                                                <>
-                                                    <NavigationMenuTrigger className="h-10 px-4 py-2 text-sm font-semibold text-slate-600 hover:text-[#26bba4] bg-transparent transition-colors focus:bg-transparent data-[state=open]:bg-transparent">
-                                                        {link.name}
-                                                    </NavigationMenuTrigger>
-
-                                                    <NavigationMenuContent className={"absolute top-full left-0 mt-2"}>
-                                                        <ul className="grid w-60 gap-1 p-3 bg-white">
-                                                            {link.subLinks.map((sub) => (
-                                                                <li key={sub.name}>
-                                                                    <NavigationMenuLink asChild>
-                                                                        <NavLink
-                                                                            to={sub.href}
-                                                                            className={({ isActive }) => `
-                                        block select-none space-y-1 rounded-lg p-3 leading-none no-underline outline-none transition-all 
-                                        ${isActive
-                                                                                    ? "bg-[#26bba4]/10 text-[#26bba4] font-bold"
-                                                                                    : "text-slate-600 hover:bg-slate-50 hover:text-[#26bba4]"}
-                                      `}
-                                                                        >
-                                                                            {sub.name}
-                                                                        </NavLink>
-                                                                    </NavigationMenuLink>
-                                                                </li>
-                                                            ))}
-                                                        </ul>
-                                                    </NavigationMenuContent>
-                                                </>
-                                            ) : (
-                                                <NavLink
-                                                    to={link.href}
-                                                    className={({ isActive }) =>
-                                                        `px-4 py-2 text-sm font-semibold transition-all rounded-full hover:text-[#26bba4] 
-                            ${isActive ? "text-[#26bba4] bg-[#26bba4]/5" : "text-slate-600"}`
-                                                    }
-                                                >
-                                                    {link.name}
-                                                </NavLink>
-                                            )}
-                                        </NavigationMenuItem>
-                                    ))}
-                                </NavigationMenuList>
-                            </NavigationMenu>
-                        </nav>
-
-                        {/* Auth Section */}
-                        <div className="ml-4 pl-4 border-l border-slate-100 h-8 flex items-center">
-                            <UserAuthSection />
-                        </div>
-                    </div>
+                    <DesktopNavigation navLinks={navLinks} cartCount={cartCount} />
 
                     {/* Mobile Drawer */}
-                    <div className="lg:hidden flex items-center gap-3">
+                    <div className="lg:hidden flex items-end gap-3">
+                        {/* --- CART ICON (MOBILE) --- */}
+                        <Link to="/cart" className="relative p-2 text-slate-600">
+                            <ShoppingCart size={24} />
+                            {cartCount > 0 && (
+                                <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold h-4 w-4 flex items-center justify-center rounded-full">
+                                    {cartCount}
+                                </span>
+                            )}
+                        </Link>
+
                         {user && <UserAuthSection isMobile={false} />}
+
                         <Sheet>
                             <SheetTrigger asChild>
                                 <Button variant="ghost" size="icon" className="hover:bg-[#26bba4]/5 text-slate-900">
@@ -121,7 +97,7 @@ export default function Navbar() {
                                                     to={link.href}
                                                     className={({ isActive }) =>
                                                         `text-base font-bold p-3 rounded-xl transition-all flex items-center justify-between
-                            ${isActive ? "bg-[#26bba4] text-white" : "text-slate-800 hover:bg-slate-100"}`
+                                                        ${isActive ? "bg-[#26bba4] text-white" : "text-slate-800 hover:bg-slate-100"}`
                                                     }
                                                 >
                                                     {link.name}
@@ -134,9 +110,9 @@ export default function Navbar() {
                                                                 key={sub.name}
                                                                 to={sub.href}
                                                                 className={({ isActive }) => `
-                                  text-sm py-2.5 font-medium transition-colors
-                                  ${isActive ? "text-[#26bba4] font-bold" : "text-slate-500 hover:text-[#26bba4]"}
-                                `}
+                                                                    text-sm py-2.5 font-medium transition-colors
+                                                                    ${isActive ? "text-[#26bba4] font-bold" : "text-slate-500 hover:text-[#26bba4]"}
+                                                                `}
                                                             >
                                                                 {sub.name}
                                                             </NavLink>
